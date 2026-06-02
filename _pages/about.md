@@ -3,10 +3,7 @@ title: "About"
 permalink: /about/
 author_profile: true
 ---
-
-# My Journey
-
-## From Restaurant Owner to F&B Procurement Specialist
+## My journey from restaurant owner to F&B procurement specialist
 
 ### The Beginning
 
