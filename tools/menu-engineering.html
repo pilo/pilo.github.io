@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu Engineering — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C;
+    --star:#2E7D5B; --plow:#C8943B; --puzzle:#1F6358; --dog:#9a6b55;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),
+                     radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;min-height:100vh;
+    padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;
+  }
+  .wrap{max-width:1160px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:.2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:34px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:64ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+
+  .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:26px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .15s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:18px 22px 22px}
+  .ghost-btn{font-family:inherit;font-size:.74rem;letter-spacing:.04em;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 11px;border-radius:999px;cursor:pointer;transition:.2s}
+  .ghost-btn:hover{border-color:var(--pine);color:var(--pine)}
+
+  /* item rows */
+  .it-head,.it-row{display:grid;grid-template-columns:1.6fr .8fr .8fr .8fr 26px;gap:8px;align-items:center}
+  .it-head{font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);padding:0 2px 8px;font-weight:600}
+  .it-row{margin-bottom:8px}
+  @media(max-width:560px){
+    .it-head{display:none}
+    .it-row{grid-template-columns:1fr 1fr;gap:7px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+    .it-row .nm{grid-column:1 / -1}
+    .it-row .del{grid-column:2;justify-self:end}
+  }
+  input{font-family:inherit;font-size:.9rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;transition:.15s}
+  input[type=number]{font-family:'Spline Sans Mono',monospace;font-size:.84rem}
+  input:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+  .del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:1.1rem;padding:4px;border-radius:6px;transition:.15s}
+  .del:hover{color:var(--dog);background:rgba(154,107,85,.1)}
+  .row-actions{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+  .add-btn{font-family:inherit;font-size:.86rem;font-weight:600;background:var(--pine);color:#F3EDE3;border:none;padding:9px 16px;border-radius:8px;cursor:pointer;transition:.2s}
+  .add-btn:hover{background:var(--pine-soft)}
+
+  /* matrix */
+  svg.matrix{display:block;width:100%;height:auto;margin-bottom:14px}
+  .legend{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;font-size:.8rem}
+  .legend .li{display:flex;gap:8px;align-items:flex-start}
+  .dot{width:10px;height:10px;border-radius:50%;margin-top:5px;flex:none}
+  .legend b{font-weight:600}
+  .legend small{display:block;color:var(--ink-soft);font-size:.74rem;line-height:1.35}
+
+  /* classification table */
+  .ct{margin-top:18px;border-top:1px solid var(--line)}
+  .ct .crow{display:grid;grid-template-columns:1.5fr auto auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px dashed var(--line)}
+  .ct .crow .nm{font-weight:600;font-size:.92rem}
+  .ct .crow .nm small{display:block;font-weight:400;color:var(--ink-soft);font-size:.74rem}
+  .ct .fig{font-family:'Spline Sans Mono',monospace;font-size:.8rem;color:var(--ink-soft);text-align:right}
+  .tag{font-size:.7rem;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .t-star{background:rgba(46,125,91,.15);color:var(--star)}
+  .t-plow{background:rgba(200,148,59,.18);color:#9a6f1f}
+  .t-puzzle{background:rgba(31,99,88,.15);color:var(--puzzle)}
+  .t-dog{background:rgba(154,107,85,.16);color:#7d5440}
+
+  .thresholds{font-size:.78rem;color:var(--ink-soft);margin-top:14px;padding:11px 13px;background:var(--paper);border:1px solid var(--line);border-radius:9px;line-height:1.55}
+  .thresholds b{color:var(--ink)}
+  .empty{color:var(--ink-soft);font-size:.9rem;padding:24px 0;text-align:center}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="mark">F&amp;B Procurement Toolkit</span>
+    <a class="back" href="/projects/">← All tools</a>
+  </div>
+
+  <header class="hero">
+    <div class="eyebrow">Menu Profitability · Domain — Food Cost &amp; Yield</div>
+    <h1>Menu <em>Engineering</em> Matrix</h1>
+    <p class="lede">Classify every dish by popularity and contribution margin into Stars, Plowhorses, Puzzles and Dogs — the Kasavana–Smith model. The analysis an F&amp;B controller runs before a menu re-design to decide what to protect, reprice, reposition or cut.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="hd">
+        <h2>Menu items</h2>
+        <button class="ghost-btn" id="loadExample">Load example menu</button>
+      </div>
+      <div class="bd">
+        <div class="it-head">
+          <span>Dish</span><span>Food cost €</span><span>Sell price €</span><span>Units sold</span><span></span>
+        </div>
+        <div id="rows"></div>
+        <div class="row-actions"><button class="add-btn" id="addRow">+ Add dish</button></div>
+        <div class="thresholds" id="thr">
+          Add items to compute the menu averages. <b>Popularity threshold</b> uses the 70% rule: an item is "popular" if its menu-mix share ≥ (1 ÷ number of items) × 0.70. <b>Profitability threshold</b> is the menu's average contribution margin per unit sold.
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd"><h2>The matrix</h2></div>
+      <div class="bd">
+        <svg class="matrix" id="matrix" viewBox="0 0 360 320" aria-label="Menu engineering matrix"></svg>
+        <div class="legend">
+          <div class="li"><span class="dot" style="background:var(--star)"></span><span><b>Star</b> — high pop · high margin<small>Protect, promote, hold the recipe &amp; price.</small></span></div>
+          <div class="li"><span class="dot" style="background:var(--plow)"></span><span><b>Plowhorse</b> — high pop · low margin<small>Reprice or cut cost; portion / spec review.</small></span></div>
+          <div class="li"><span class="dot" style="background:var(--puzzle)"></span><span><b>Puzzle</b> — low pop · high margin<small>Promote, reposition on the menu, upsell.</small></span></div>
+          <div class="li"><span class="dot" style="background:var(--dog)"></span><span><b>Dog</b> — low pop · low margin<small>Remove or redesign.</small></span></div>
+        </div>
+        <div class="ct" id="classTable"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · Menu profitability analysis</span>
+    <span>CM = price − food cost · classification: Kasavana–Smith</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const rowsEl=document.getElementById('rows');
+  const fmt=n=>'€'+(isFinite(n)?n:0).toFixed(2);
+  let data=[];
+
+  function rowTemplate(r,i){
+    const div=document.createElement('div');
+    div.className='it-row';
+    div.innerHTML=`
+      <input class="nm" type="text" placeholder="Dish name" value="${r.name||''}" data-i="${i}" data-f="name">
+      <input type="number" min="0" step="any" placeholder="0.00" value="${r.cost??''}" data-i="${i}" data-f="cost">
+      <input type="number" min="0" step="any" placeholder="0.00" value="${r.price??''}" data-i="${i}" data-f="price">
+      <input type="number" min="0" step="1" placeholder="0" value="${r.units??''}" data-i="${i}" data-f="units">
+      <button class="del" data-del="${i}" title="Remove">×</button>`;
+    return div;
+  }
+  function render(){rowsEl.innerHTML='';data.forEach((r,i)=>rowsEl.appendChild(rowTemplate(r,i)));compute();}
+
+  function classify(){
+    const items=data.map(r=>({
+      name:(r.name||'').trim(),
+      cost:parseFloat(r.cost)||0,
+      price:parseFloat(r.price)||0,
+      units:parseFloat(r.units)||0
+    })).filter(x=>x.units>0 && x.price>0);
+    const N=items.length;
+    const totalUnits=items.reduce((s,x)=>s+x.units,0);
+    const totalCM=items.reduce((s,x)=>s+(x.price-x.cost)*x.units,0);
+    const avgCM = totalUnits>0 ? totalCM/totalUnits : 0;             // profitability threshold
+    const popThresh = N>0 ? (1/N)*0.70 : 0;                          // 70% rule (share)
+    items.forEach(x=>{
+      x.cm = x.price-x.cost;
+      x.mix = totalUnits>0 ? x.units/totalUnits : 0;
+      x.popular = x.mix >= popThresh;
+      x.profitable = x.cm >= avgCM;
+      x.cat = x.popular ? (x.profitable?'star':'plow') : (x.profitable?'puzzle':'dog');
+    });
+    return {items, avgCM, popThresh, N};
+  }
+
+  function compute(){
+    const {items, avgCM, popThresh, N} = classify();
+    drawMatrix(items, avgCM, popThresh);
+    drawTable(items);
+    const thr=document.getElementById('thr');
+    if(N>0){
+      thr.innerHTML = `Across <b>${N}</b> items · average contribution margin <b>${fmt(avgCM)}</b> per unit (profitability line) · popularity threshold <b>${(popThresh*100).toFixed(1)}%</b> menu mix (70% rule).`;
+    }
+  }
+
+  const CAT_COLOR={star:'#2E7D5B',plow:'#C8943B',puzzle:'#1F6358',dog:'#9a6b55'};
+  const CAT_LABEL={star:'STAR',plow:'PLOWHORSE',puzzle:'PUZZLE',dog:'DOG'};
+  const CAT_TAG={star:'t-star',plow:'t-plow',puzzle:'t-puzzle',dog:'t-dog'};
+
+  function drawMatrix(items, avgCM, popThresh){
+    const svg=document.getElementById('matrix');
+    const L=46,Rp=14,T=14,B=40, W=360,H=320;
+    const x0=L, x1=W-Rp, y0=H-B, y1=T;
+    const plotW=x1-x0, plotH=y0-y1;
+    // scales: x = menu mix %, y = contribution margin
+    const maxMix=Math.max(popThresh*2.2, ...items.map(i=>i.mix), 0.01);
+    const maxCM=Math.max(avgCM*2.0, ...items.map(i=>i.cm), 1);
+    const sx=v=>x0+(v/maxMix)*plotW;
+    const sy=v=>y0-(v/maxCM)*plotH;
+
+    let g='';
+    // quadrant backgrounds
+    const qx=sx(popThresh), qy=sy(avgCM);
+    g+=`<rect x="${qx}" y="${y1}" width="${x1-qx}" height="${qy-y1}" fill="rgba(46,125,91,.06)"/>`;     // star TR
+    g+=`<rect x="${x0}" y="${y1}" width="${qx-x0}" height="${qy-y1}" fill="rgba(31,99,88,.05)"/>`;        // puzzle TL
+    g+=`<rect x="${qx}" y="${qy}" width="${x1-qx}" height="${y0-qy}" fill="rgba(200,148,59,.06)"/>`;      // plow BR
+    g+=`<rect x="${x0}" y="${qy}" width="${qx-x0}" height="${y0-qy}" fill="rgba(154,107,85,.05)"/>`;      // dog BL
+    // quadrant labels
+    g+=`<text x="${(qx+x1)/2}" y="${y1+15}" font-size="9" fill="#2E7D5B" text-anchor="middle" font-weight="700" font-family="Hanken Grotesk">STARS</text>`;
+    g+=`<text x="${(x0+qx)/2}" y="${y1+15}" font-size="9" fill="#1F6358" text-anchor="middle" font-weight="700" font-family="Hanken Grotesk">PUZZLES</text>`;
+    g+=`<text x="${(qx+x1)/2}" y="${y0-6}" font-size="9" fill="#9a6f1f" text-anchor="middle" font-weight="700" font-family="Hanken Grotesk">PLOWHORSES</text>`;
+    g+=`<text x="${(x0+qx)/2}" y="${y0-6}" font-size="9" fill="#7d5440" text-anchor="middle" font-weight="700" font-family="Hanken Grotesk">DOGS</text>`;
+    // threshold crosshair
+    g+=`<line x1="${qx}" y1="${y1}" x2="${qx}" y2="${y0}" stroke="rgba(27,26,22,.28)" stroke-width="1" stroke-dasharray="4 3"/>`;
+    g+=`<line x1="${x0}" y1="${qy}" x2="${x1}" y2="${qy}" stroke="rgba(27,26,22,.28)" stroke-width="1" stroke-dasharray="4 3"/>`;
+    // axes
+    g+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="rgba(27,26,22,.4)" stroke-width="1"/>`;
+    g+=`<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="rgba(27,26,22,.4)" stroke-width="1"/>`;
+    g+=`<text x="${(x0+x1)/2}" y="${H-6}" font-size="9" fill="#5C574B" text-anchor="middle" font-family="Hanken Grotesk">Popularity → menu mix %</text>`;
+    g+=`<text transform="translate(13,${(y0+y1)/2}) rotate(-90)" font-size="9" fill="#5C574B" text-anchor="middle" font-family="Hanken Grotesk">Contribution margin €</text>`;
+    // points
+    items.forEach(it=>{
+      const cx=sx(it.mix), cy=sy(it.cm), c=CAT_COLOR[it.cat];
+      g+=`<circle cx="${cx}" cy="${cy}" r="5.5" fill="${c}" fill-opacity=".85" stroke="#FBF7F0" stroke-width="1.5"/>`;
+      const lbl=(it.name||'?').slice(0,14);
+      g+=`<text x="${cx}" y="${cy-9}" font-size="8" fill="#1B1A16" text-anchor="middle" font-family="Hanken Grotesk">${escapeXml(lbl)}</text>`;
+    });
+    if(items.length===0){
+      g+=`<text x="${W/2}" y="${H/2}" font-size="11" fill="#5C574B" text-anchor="middle" font-family="Hanken Grotesk">Add dishes with price &amp; units to plot the matrix</text>`;
+    }
+    svg.innerHTML=g;
+  }
+
+  function drawTable(items){
+    const el=document.getElementById('classTable');
+    if(items.length===0){el.innerHTML='<div class="empty">No classified items yet.</div>';return;}
+    const order={star:0,puzzle:1,plow:2,dog:3};
+    const sorted=[...items].sort((a,b)=>order[a.cat]-order[b.cat] || b.cm-a.cm);
+    el.innerHTML=sorted.map(it=>`
+      <div class="crow">
+        <div class="nm">${escapeHtml(it.name||'Untitled')}<small>mix ${(it.mix*100).toFixed(1)}% · ${it.units} sold</small></div>
+        <div class="fig">CM ${fmt(it.cm)}<br>FC ${it.price>0?((it.cost/it.price)*100).toFixed(0):0}%</div>
+        <span class="tag ${CAT_TAG[it.cat]}">${CAT_LABEL[it.cat]}</span>
+      </div>`).join('');
+  }
+
+  function escapeXml(s){return String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+  function escapeHtml(s){return escapeXml(s);}
+
+  rowsEl.addEventListener('input',e=>{
+    const i=e.target.dataset.i,f=e.target.dataset.f;
+    if(i!==undefined){data[i][f]=e.target.value;compute();}
+  });
+  rowsEl.addEventListener('click',e=>{
+    if(e.target.dataset.del!==undefined){data.splice(+e.target.dataset.del,1);render();}
+  });
+  document.getElementById('addRow').addEventListener('click',()=>{
+    data.push({name:'',cost:'',price:'',units:''});render();
+    rowsEl.lastChild.querySelector('input').focus();
+  });
+  document.getElementById('loadExample').addEventListener('click',()=>{
+    data=[
+      {name:'Sea bass',     cost:7.20, price:32.00, units:140},
+      {name:'Risotto',      cost:4.95, price:24.00, units:210},
+      {name:'Burger',       cost:5.40, price:19.00, units:330},
+      {name:'Côte de bœuf', cost:18.0, price:54.00, units:60},
+      {name:'Caesar salad', cost:3.10, price:14.00, units:120},
+      {name:'Soup of day',  cost:1.80, price:9.00,  units:75},
+      {name:'Truffle pasta',cost:9.50, price:38.00, units:48}
+    ];
+    render();
+  });
+
+  data=[{name:'',cost:'',price:'',units:''},{name:'',cost:'',price:'',units:''}];
+  render();
+})();
+</script>
+</body>
+</html>
