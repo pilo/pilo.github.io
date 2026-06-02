@@ -18,7 +18,7 @@ baseurl: ""   # leave empty for a user site (yourusername.github.io)
 
 # --- Skin (visual style) ---
 # Options: default | air | aqua | contrast | dark | mint | plum | sunrise
-minimal_mistakes_skin: "sunrise"
+minimal_mistakes_skin: "mint"
 
 # --- Author sidebar ---
 author:
