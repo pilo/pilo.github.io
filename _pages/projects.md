@@ -1,42 +1,80 @@
 ---
 title: "Projects"
-permalink: /projects/
 layout: single
+permalink: /projects/
 author_profile: true
+projects:
+  - title: "Food-Cost Calculator"
+    category: "Cost Control · Food Cost & Yield"
+    description: "Cost a recipe line-by-line with trim-yield adjustment, then test it against a target food-cost % and concept benchmark."
+    url: "/tools/food-cost-calculator.html"
+  - title: "Supplier Scorecard"
+    category: "Supplier Management"
+    description: "Six weighted KPIs generate a 1–5 performance rating, radar profile, and a recommended retain / develop / replace action."
+    url: "/tools/supplier-scorecard.html"
+  - title: "Menu Engineering Matrix"
+    category: "Menu Profitability"
+    description: "Plot dishes by popularity and contribution margin into Stars, Plowhorses, Puzzles, and Dogs using the Kasavana–Smith model."
+    url: "/tools/menu-engineering.html"
 ---
 
-F&B management tools built to simplify restaurant operations.
+F&B procurement and cost-control tools I'm building as I train toward RNCP certification. Each one turns a standard industry framework into something I can run on real numbers — the way a hotel-group buyer or cost controller would.
 
-<div class="projects-grid">
+<style>
+.proj-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1.25em;
+  margin:1.75em 0;
+}
+.proj-card{
+  display:flex;
+  flex-direction:column;
+  border:1px solid #e8e8e8;
+  border-radius:8px;
+  padding:1.4em 1.4em 1.5em;
+  transition:box-shadow .25s ease, transform .25s ease;
+}
+.proj-card:hover{
+  box-shadow:0 10px 30px -12px rgba(0,0,0,.22);
+  transform:translateY(-4px);
+}
+.proj-card .eyebrow{
+  font-size:.68em;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:#8a8a8a;
+  font-weight:700;
+  margin-bottom:.55em;
+}
+.proj-card h3{
+  margin:0 0 .45em;
+  font-size:1.2em;
+  line-height:1.2;
+}
+.proj-card p{
+  font-size:.86em;
+  line-height:1.5;
+  color:#5e5e5e;
+  flex:1;
+  margin:0 0 1.2em;
+}
+.proj-card .btn{align-self:flex-start;margin:0;}
+</style>
 
-  <div class="project-card project-card--cost">
-    <div class="project-card__accent"></div>
-    <div class="project-card__body">
-      <span class="project-card__tag">Cost Control</span>
-      <h3 class="project-card__title">Food Cost Calculator</h3>
-      <p class="project-card__desc">Calculate recipe cost per portion, track food cost %, and set menu prices with target margins.</p>
-      <a href="/tools/food-cost-calculator.html" class="btn btn--primary btn--small">Open Tool →</a>
-    </div>
+<div class="proj-grid">
+{% for p in page.projects %}
+  <div class="proj-card">
+    <div class="eyebrow">{{ p.category }}</div>
+    <h3>{{ p.title }}</h3>
+    <p>{{ p.description }}</p>
+    <a class="btn btn--primary" href="{{ p.url }}">Open tool →</a>
   </div>
-
-  <div class="project-card project-card--menu">
-    <div class="project-card__accent"></div>
-    <div class="project-card__body">
-      <span class="project-card__tag">Menu Analysis</span>
-      <h3 class="project-card__title">Menu Engineering Matrix</h3>
-      <p class="project-card__desc">Classify dishes by profitability and popularity — Stars, Plowhorses, Puzzles, and Dogs.</p>
-      <a href="/tools/menu-engineering.html" class="btn btn--primary btn--small">Open Tool →</a>
-    </div>
-  </div>
-
-  <div class="project-card project-card--finance">
-    <div class="project-card__accent"></div>
-    <div class="project-card__body">
-      <span class="project-card__tag">Supplier Scorecard</span>
-      <h3 class="project-card__title">Supplier scorecard</h3>
-      <p class="project-card__desc">Help decisions by building suppliers scorecards and pointing out actions to take based on scores.</p>
-      <a href="/tools/menu-engineering.html" class="btn btn--primary btn--small">Open Tool →</a>
-    </div>
-  </div>
-
+{% endfor %}
 </div>
+
+## About this toolkit
+
+I'm building formal procurement and supply-chain credentials on top of hands-on F&B operations experience — supplier relationships, food-cost management, and full P&L responsibility in an upscale Riviera market.
+
+These tools are how I study: each turns a textbook framework into something I can run on real numbers, the way a hotel-group procurement manager or cost controller would. The code is mine; the methods are industry-standard.
