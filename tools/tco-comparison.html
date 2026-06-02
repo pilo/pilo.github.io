@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCO Comparison — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C; --clay:#9a6b55;
+    --good:#2E7D5B; --warn:#C8943B; --bad:#A23B2E;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),
+                     radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;min-height:100vh;
+    padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;
+  }
+  .wrap{max-width:1160px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:.2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:32px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:64ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+
+  .grid{display:grid;grid-template-columns:1.6fr 1fr;gap:26px;align-items:start}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .15s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:18px 22px 22px}
+  .ghost-btn{font-family:inherit;font-size:.74rem;letter-spacing:.04em;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 11px;border-radius:999px;cursor:pointer;transition:.2s;white-space:nowrap}
+  .ghost-btn:hover{border-color:var(--pine);color:var(--pine)}
+  .hd-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+  /* global driver */
+  .driver{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+  .driver label{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .driver input{width:120px}
+
+  input{font-family:'Spline Sans Mono',monospace;font-size:.84rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px 9px;width:100%;transition:.15s;text-align:right}
+  input.txt{font-family:'Hanken Grotesk',sans-serif;text-align:left;font-size:.9rem}
+  input:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+
+  /* table */
+  .scroll{overflow-x:auto;margin:0 -4px;padding:0 4px}
+  .trow{display:grid;gap:8px;align-items:center;min-width:340px}
+  .trow + .trow{margin-top:7px}
+  .thead .cell{font-weight:700}
+  .thead .sup-name{padding:0}
+  .cell{font-size:.86rem}
+  .cell.label{color:var(--ink);font-weight:500}
+  .cell.label small{display:block;font-weight:400;color:var(--ink-soft);font-size:.7rem;font-family:'Spline Sans Mono',monospace}
+  .grouprow{margin-top:16px;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+  .grouprow .gl{font-family:'Fraunces',serif;font-style:italic;font-size:1.02rem}
+  .grouprow .gl::before{content:"";display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px;vertical-align:middle;background:var(--g,var(--pine))}
+  .grouprow .gline{flex:1;height:1px;background:var(--line)}
+  .delcol{display:flex;justify-content:flex-end}
+  .delsup{background:none;border:1px solid var(--line);color:var(--ink-soft);font-size:.7rem;padding:4px 8px;border-radius:6px;cursor:pointer;transition:.15s}
+  .delsup:hover{color:var(--bad);border-color:var(--bad)}
+
+  /* results */
+  .results{position:sticky;top:24px}
+  .verdict{font-size:.95rem;line-height:1.55;padding:14px 16px;border-radius:11px;background:rgba(15,76,69,.07);border:1px solid rgba(15,76,69,.16);margin-bottom:20px}
+  .verdict b{color:var(--pine)}
+  .verdict.flag{background:rgba(200,148,59,.12);border-color:rgba(200,148,59,.3)}
+  .verdict.flag b{color:#9a6f1f}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.74rem;color:var(--ink-soft);margin-bottom:14px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+  .bar-block{margin-bottom:16px}
+  .bar-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .bar-top .nm{font-weight:600;font-size:.9rem}
+  .bar-top .nm .win{font-size:.64rem;font-weight:700;letter-spacing:.05em;color:var(--good);background:rgba(46,125,91,.14);padding:2px 7px;border-radius:999px;margin-left:7px}
+  .bar-top .tot{font-family:'Spline Sans Mono',monospace;font-size:.95rem;font-weight:500}
+  .bar{display:flex;height:22px;border-radius:5px;overflow:hidden;background:var(--paper);border:1px solid var(--line)}
+  .seg{height:100%;transition:width .4s ease}
+  .seg.acq{background:var(--pine)} .seg.own{background:var(--brass)} .seg.post{background:var(--clay)}
+  .bar-sub{font-family:'Spline Sans Mono',monospace;font-size:.72rem;color:var(--ink-soft);margin-top:4px}
+
+  .breakdown{margin-top:20px;border-top:1px solid var(--line);padding-top:14px}
+  .bd-row{display:flex;justify-content:space-between;font-size:.8rem;padding:5px 0;color:var(--ink-soft)}
+  .bd-row.tot{border-top:1px dashed var(--line);margin-top:5px;padding-top:8px;color:var(--ink);font-weight:600}
+  .bd-row .v{font-family:'Spline Sans Mono',monospace}
+  .bd-sup-name{font-family:'Fraunces',serif;font-size:1.05rem;margin:14px 0 4px}
+
+  .exam-tip{margin-top:18px;font-size:.8rem;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--brass);border-radius:8px;padding:11px 13px;line-height:1.5}
+  .exam-tip b{color:var(--ink)}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="mark">F&amp;B Procurement Toolkit</span>
+    <a class="back" href="/projects/">← All tools</a>
+  </div>
+
+  <header class="hero">
+    <div class="eyebrow">Sourcing Strategy · Domain — Total Cost of Ownership</div>
+    <h1>Total Cost of <em>Ownership</em></h1>
+    <p class="lede">Compare suppliers on true landed cost — not invoice price. Model the three cost layers a category buyer accounts for before awarding a contract: acquisition, ownership, and end-of-life. The headline lesson it proves on real numbers: the cheapest unit price is often not the cheapest supplier.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="hd">
+        <h2>Cost model</h2>
+        <div class="hd-actions">
+          <button class="ghost-btn" id="addSup">+ Add supplier</button>
+          <button class="ghost-btn" id="loadExample">Load example</button>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="driver">
+          <label for="volume">Annual volume (units / kg)</label>
+          <input type="number" id="volume" min="0" step="any" placeholder="0">
+          <span style="font-size:.76rem;color:var(--ink-soft)">Shared demand driver — keeps the comparison like-for-like.</span>
+        </div>
+        <div class="scroll"><div id="table"></div></div>
+      </div>
+    </section>
+
+    <section class="card results">
+      <div class="hd"><h2>Verdict</h2></div>
+      <div class="bd">
+        <div class="verdict" id="verdict">Enter an annual volume and supplier costs to model total cost of ownership.</div>
+        <div class="legend">
+          <span><i style="background:var(--pine)"></i>Acquisition</span>
+          <span><i style="background:var(--brass)"></i>Ownership</span>
+          <span><i style="background:var(--clay)"></i>End-of-life</span>
+        </div>
+        <div id="bars"></div>
+        <div class="breakdown" id="breakdown"></div>
+        <div class="exam-tip"><b>Exam &amp; interview note:</b> "Cheapest price ≠ lowest TCO" is a recurring theme. In interview: <em>"I don't evaluate suppliers on price — I model total cost of ownership across acquisition, ownership and end-of-life."</em></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · Sourcing strategy &amp; supplier comparison</span>
+    <span>TCO = Acquisition + Ownership + End-of-life · landed cost = TCO ÷ volume</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const GROUPS = [
+    {key:'acq',  name:'Acquisition cost', color:'var(--pine)', lines:[
+      {k:'price',   label:'Unit price',                 hint:'€ / unit'},
+      {k:'freight', label:'Inbound freight & logistics',hint:'€ / year'},
+      {k:'dutyPct', label:'Duties / customs',           hint:'% of spend'}
+    ]},
+    {key:'own',  name:'Ownership cost', color:'var(--brass)', lines:[
+      {k:'holdPct',  label:'Inventory holding (storage + capital)', hint:'% of spend / yr'},
+      {k:'qfailPct', label:'Quality failures / returns',           hint:'% of spend'},
+      {k:'orders',   label:'Orders per year',                      hint:'count'},
+      {k:'adminPer', label:'Admin cost per order',                 hint:'€ / order'},
+      {k:'compliance',label:'Compliance / audit risk',            hint:'€ / year'}
+    ]},
+    {key:'post', name:'End-of-life cost', color:'var(--clay)', lines:[
+      {k:'wastePct', label:'Waste / spoilage',          hint:'% of spend'},
+      {k:'switch',   label:'Switching / changeover',    hint:'€ one-off'}
+    ]}
+  ];
+  const FIELDS = GROUPS.flatMap(g=>g.lines.map(l=>l.k));
+
+  let suppliers = [ blank('Supplier A'), blank('Supplier B') ];
+  function blank(name){ const o={name}; FIELDS.forEach(f=>o[f]=''); return o; }
+
+  const fmt0 = n => '€' + Math.round(isFinite(n)?n:0).toLocaleString('en-IE');
+  const fmt2 = n => '€' + (isFinite(n)?n:0).toFixed(2);
+  const num = v => parseFloat(v)||0;
+
+  function colTemplate(){
+    return `minmax(150px,1.5fr) repeat(${suppliers.length}, minmax(88px,1fr))`;
+  }
+
+  function renderTable(){
+    const t = document.getElementById('table');
+    const tpl = colTemplate();
+    let html = '';
+    // header
+    html += `<div class="trow thead" style="grid-template-columns:${tpl}">`;
+    html += `<div class="cell label"></div>`;
+    suppliers.forEach((s,i)=>{
+      html += `<div class="cell sup-name"><input class="txt" type="text" value="${escapeAttr(s.name)}" data-i="${i}" data-f="name" placeholder="Supplier ${i+1}"></div>`;
+    });
+    html += `</div>`;
+    // delete-supplier row (only if >2)
+    if(suppliers.length>2){
+      html += `<div class="trow" style="grid-template-columns:${tpl}"><div class="cell"></div>`;
+      suppliers.forEach((s,i)=>{ html += `<div class="delcol"><button class="delsup" data-del="${i}">remove</button></div>`; });
+      html += `</div>`;
+    }
+    // groups
+    GROUPS.forEach(g=>{
+      html += `<div class="grouprow"><span class="gl" style="--g:${g.color}">${g.name}</span><span class="gline"></span></div>`;
+      g.lines.forEach(l=>{
+        html += `<div class="trow" style="grid-template-columns:${tpl}">`;
+        html += `<div class="cell label">${l.label}<small>${l.hint}</small></div>`;
+        suppliers.forEach((s,i)=>{
+          html += `<div class="cell"><input type="number" min="0" step="any" value="${s[l.k]}" data-i="${i}" data-f="${l.k}" placeholder="0"></div>`;
+        });
+        html += `</div>`;
+      });
+    });
+    t.innerHTML = html;
+  }
+
+  function calc(s, volume){
+    const purchase = num(s.price)*volume;
+    const acq = purchase + num(s.freight) + num(s.dutyPct)/100*purchase;
+    const own = num(s.holdPct)/100*purchase + num(s.qfailPct)/100*purchase
+              + num(s.orders)*num(s.adminPer) + num(s.compliance);
+    const post = num(s.wastePct)/100*purchase + num(s.switch);
+    const tco = acq+own+post;
+    return {purchase, acq, own, post, tco, unit: volume>0 ? tco/volume : 0};
+  }
+
+  function compute(){
+    const volume = num(document.getElementById('volume').value);
+    const rows = suppliers.map(s=>({s, c:calc(s, volume)}));
+    const anyData = volume>0 && rows.some(r=>num(r.s.price)>0);
+
+    // verdict
+    const vEl = document.getElementById('verdict');
+    if(!anyData){
+      vEl.className='verdict';
+      vEl.innerHTML='Enter an annual volume and supplier costs to model total cost of ownership.';
+    } else {
+      const byPrice = [...rows].sort((a,b)=>num(a.s.price)-num(b.s.price));
+      const byTco   = [...rows].sort((a,b)=>a.c.tco-b.c.tco);
+      const cheapPrice = byPrice[0], lowTco = byTco[0];
+      if(cheapPrice.s===lowTco.s){
+        vEl.className='verdict';
+        vEl.innerHTML=`<b>${escapeHtml(lowTco.s.name)}</b> wins on both counts — lowest unit price <b>and</b> lowest total cost of ownership at ${fmt0(lowTco.c.tco)}/yr (${fmt2(lowTco.c.unit)}/unit landed).`;
+      } else {
+        const delta = cheapPrice.c.tco - lowTco.c.tco;
+        vEl.className='verdict flag';
+        vEl.innerHTML=`<b>${escapeHtml(cheapPrice.s.name)}</b> has the lowest invoice price (${fmt2(num(cheapPrice.s.price))}/unit) — but once total cost of ownership is modelled, <b>${escapeHtml(lowTco.s.name)}</b> is cheaper by <b>${fmt0(delta)}/yr</b> (${fmt0(lowTco.c.tco)} vs ${fmt0(cheapPrice.c.tco)}). Cheapest price ≠ lowest cost.`;
+      }
+    }
+
+    // bars
+    const maxTco = Math.max(1, ...rows.map(r=>r.c.tco));
+    const winner = rows.reduce((a,b)=> b.c.tco>0 && (a===null || b.c.tco<a.c.tco) ? b : a, null);
+    const barsEl = document.getElementById('bars');
+    barsEl.innerHTML = rows.map(r=>{
+      const w = x => (r.c.tco>0 ? (x/maxTco*100) : 0);
+      const isWin = anyData && winner && r.s===winner.s && rows.length>1;
+      return `<div class="bar-block">
+        <div class="bar-top">
+          <span class="nm">${escapeHtml(r.s.name)}${isWin?'<span class="win">LOWEST TCO</span>':''}</span>
+          <span class="tot">${fmt0(r.c.tco)}</span>
+        </div>
+        <div class="bar">
+          <div class="seg acq"  style="width:${w(r.c.acq)}%"  title="Acquisition ${fmt0(r.c.acq)}"></div>
+          <div class="seg own"  style="width:${w(r.c.own)}%"  title="Ownership ${fmt0(r.c.own)}"></div>
+          <div class="seg post" style="width:${w(r.c.post)}%" title="End-of-life ${fmt0(r.c.post)}"></div>
+        </div>
+        <div class="bar-sub">${fmt2(r.c.unit)} / unit landed</div>
+      </div>`;
+    }).join('');
+
+    // breakdown
+    const bdEl = document.getElementById('breakdown');
+    if(!anyData){ bdEl.innerHTML=''; return; }
+    bdEl.innerHTML = rows.map(r=>`
+      <div class="bd-sup-name">${escapeHtml(r.s.name)}</div>
+      <div class="bd-row"><span>Acquisition</span><span class="v">${fmt0(r.c.acq)}</span></div>
+      <div class="bd-row"><span>Ownership</span><span class="v">${fmt0(r.c.own)}</span></div>
+      <div class="bd-row"><span>End-of-life</span><span class="v">${fmt0(r.c.post)}</span></div>
+      <div class="bd-row tot"><span>Total cost of ownership</span><span class="v">${fmt0(r.c.tco)}</span></div>
+    `).join('');
+  }
+
+  function render(){ renderTable(); compute(); }
+
+  // events
+  document.getElementById('table').addEventListener('input', e=>{
+    const i=e.target.dataset.i, f=e.target.dataset.f;
+    if(i!==undefined){ suppliers[i][f]=e.target.value; compute(); }
+  });
+  document.getElementById('table').addEventListener('click', e=>{
+    if(e.target.dataset.del!==undefined){ suppliers.splice(+e.target.dataset.del,1); render(); }
+  });
+  document.getElementById('volume').addEventListener('input', compute);
+  document.getElementById('addSup').addEventListener('click', ()=>{
+    if(suppliers.length>=3) return;
+    suppliers.push(blank('Supplier '+String.fromCharCode(65+suppliers.length)));
+    render();
+  });
+  document.getElementById('loadExample').addEventListener('click', ()=>{
+    document.getElementById('volume').value = 5200;
+    suppliers = [
+      {name:'Riviera Wholesale', price:4.20, freight:1800, dutyPct:0, holdPct:18, qfailPct:4, orders:104, adminPer:25, compliance:0,   wastePct:3, switch:0},
+      {name:'Provence Direct',   price:4.65, freight:600,  dutyPct:0, holdPct:12, qfailPct:1, orders:52,  adminPer:25, compliance:300, wastePct:1, switch:0}
+    ];
+    render();
+  });
+
+  function escapeHtml(s){return String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+  function escapeAttr(s){return escapeHtml(s).replace(/"/g,'&quot;');}
+
+  render();
+})();
+</script>
+</body>
+</html>
