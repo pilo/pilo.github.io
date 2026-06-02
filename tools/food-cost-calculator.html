@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipe Food-Cost Calculator — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C;
+    --good:#2E7D5B; --warn:#C8943B; --bad:#A23B2E;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),
+                     radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;
+    min-height:100vh;
+    padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;
+  }
+  .wrap{max-width:1120px;margin:0 auto}
+  a{color:inherit}
+
+  /* header */
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:color .2s,border-color .2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:34px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:60ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+
+  /* layout */
+  .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:26px;align-items:start}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .15s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:18px 22px 22px}
+
+  .ghost-btn{font-family:inherit;font-size:.74rem;letter-spacing:.04em;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 11px;border-radius:999px;cursor:pointer;transition:.2s}
+  .ghost-btn:hover{border-color:var(--pine);color:var(--pine)}
+
+  /* ingredient table */
+  .ing-head,.ing-row{display:grid;grid-template-columns:1.7fr .9fr .8fr 1fr .75fr 28px;gap:8px;align-items:center}
+  .ing-head{font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);padding:0 2px 8px;font-weight:600}
+  .ing-row{margin-bottom:8px}
+  @media(max-width:600px){
+    .ing-head{display:none}
+    .ing-row{grid-template-columns:1fr 1fr;gap:7px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+    .ing-row .nm{grid-column:1 / -1}
+    .ing-row .del{grid-column:2;justify-self:end}
+  }
+  input,select{font-family:inherit;font-size:.92rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;transition:border-color .15s,box-shadow .15s}
+  input:focus,select:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+  input[type=number]{font-family:'Spline Sans Mono',monospace;font-size:.86rem}
+  .del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:1.1rem;line-height:1;padding:4px;border-radius:6px;transition:.15s}
+  .del:hover{color:var(--bad);background:rgba(162,59,46,.08)}
+  .row-actions{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+  .add-btn{font-family:inherit;font-size:.86rem;font-weight:600;background:var(--pine);color:#F3EDE3;border:none;padding:9px 16px;border-radius:8px;cursor:pointer;transition:.2s}
+  .add-btn:hover{background:var(--pine-soft)}
+
+  /* params */
+  .params{margin-top:22px;border-top:1px solid var(--line);padding-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .field label{display:block;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:5px}
+  .hint{font-size:.7rem;color:var(--ink-soft);margin-top:5px;line-height:1.35}
+
+  /* results */
+  .results{position:sticky;top:24px}
+  .stat{padding:15px 0;border-bottom:1px dashed var(--line)}
+  .stat:last-child{border-bottom:none}
+  .stat .k{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .stat .v{font-family:'Spline Sans Mono',monospace;font-size:1.5rem;font-weight:500;margin-top:3px;letter-spacing:-.01em}
+  .stat.big .v{font-size:2.3rem;color:var(--pine)}
+  .stat .sub{font-size:.74rem;color:var(--ink-soft);margin-top:2px}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;font-weight:600;padding:4px 11px;border-radius:999px;margin-top:8px}
+  .badge::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .b-good{background:rgba(46,125,91,.13);color:var(--good)}
+  .b-warn{background:rgba(200,148,59,.16);color:#9a6f1f}
+  .b-bad{background:rgba(162,59,46,.13);color:var(--bad)}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="mark">F&amp;B Procurement Toolkit</span>
+    <a class="back" href="/projects/">← All tools</a>
+  </div>
+
+  <header class="hero">
+    <div class="eyebrow">Cost Control · Domain — Food Cost &amp; Yield</div>
+    <h1>Recipe <em>Food-Cost</em> Calculator</h1>
+    <p class="lede">Cost a dish line-by-line, adjust for trim yield, and test it against a target food-cost %. Built to mirror the costing logic a hotel-group F&amp;B controller applies to every standard recipe card.</p>
+  </header>
+
+  <div class="grid">
+    <!-- builder -->
+    <section class="card">
+      <div class="hd">
+        <h2>Recipe builder</h2>
+        <button class="ghost-btn" id="loadExample">Load example: Risotto</button>
+      </div>
+      <div class="bd">
+        <div class="ing-head">
+          <span>Ingredient</span><span>Qty</span><span>Unit</span><span>Cost (€/kg·L·ea)</span><span>Yield %</span><span></span>
+        </div>
+        <div id="rows"></div>
+        <div class="row-actions">
+          <button class="add-btn" id="addRow">+ Add ingredient</button>
+        </div>
+
+        <div class="params">
+          <div class="field">
+            <label for="portions">Portions per recipe</label>
+            <input type="number" id="portions" min="1" step="1" value="4">
+          </div>
+          <div class="field">
+            <label for="price">Menu price — net of VAT (€)</label>
+            <input type="number" id="price" min="0" step="0.5" value="16.00">
+            <p class="hint">Use the <strong>ex-VAT</strong> price. Food-cost % is always measured against net revenue.</p>
+          </div>
+          <div class="field">
+            <label for="target">Target food-cost %</label>
+            <input type="number" id="target" min="1" max="100" step="1" value="30">
+          </div>
+          <div class="field">
+            <label for="concept">Benchmark concept</label>
+            <select id="concept">
+              <option value="qsr" data-lo="28" data-hi="32">Quick service (28–32%)</option>
+              <option value="casual" data-lo="30" data-hi="35">Casual dining (30–35%)</option>
+              <option value="fine" data-lo="28" data-hi="38">Fine dining (28–38%)</option>
+              <option value="hotel" data-lo="30" data-hi="38" selected>Hotel F&amp;B (30–38%)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- results -->
+    <section class="card results">
+      <div class="hd"><h2>Costing output</h2></div>
+      <div class="bd">
+        <div class="stat">
+          <div class="k">Total recipe cost</div>
+          <div class="v" id="o-total">€0.00</div>
+        </div>
+        <div class="stat big">
+          <div class="k">Cost per portion</div>
+          <div class="v" id="o-portion">€0.00</div>
+          <div class="sub" id="o-portion-sub">Yield-adjusted true cost</div>
+        </div>
+        <div class="stat">
+          <div class="k">Food cost %</div>
+          <div class="v" id="o-fc">0.0%</div>
+          <span class="badge b-good" id="o-fc-badge">In benchmark</span>
+        </div>
+        <div class="stat">
+          <div class="k">Contribution margin / portion</div>
+          <div class="v" id="o-cm">€0.00</div>
+          <div class="sub">Net price − portion cost</div>
+        </div>
+        <div class="stat">
+          <div class="k">Price to hit target FC%</div>
+          <div class="v" id="o-suggested">€0.00</div>
+          <div class="sub" id="o-suggested-sub">at 30% target</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · Procurement &amp; F&amp;B cost control</span>
+    <span>Formulas: cost/portion · FC% = cost ÷ net price · true cost = AP cost ÷ yield</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const rowsEl = document.getElementById('rows');
+  const fmt = n => '€' + (isFinite(n)?n:0).toLocaleString('en-IE',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const pct = n => (isFinite(n)?n:0).toFixed(1) + '%';
+
+  const UNITS = ['g','kg','ml','L','unit'];
+  let data = [];
+
+  function unitFactor(qty, unit){
+    switch(unit){
+      case 'g': return qty/1000;   // → kg
+      case 'kg': return qty;
+      case 'ml': return qty/1000;  // → L
+      case 'L': return qty;
+      case 'unit': return qty;
+    }
+    return qty;
+  }
+
+  function rowTemplate(r, i){
+    const opts = UNITS.map(u=>`<option ${u===r.unit?'selected':''}>${u}</option>`).join('');
+    const div = document.createElement('div');
+    div.className = 'ing-row';
+    div.innerHTML = `
+      <input class="nm" type="text" placeholder="Ingredient" value="${r.name||''}" data-i="${i}" data-f="name">
+      <input type="number" min="0" step="any" placeholder="0" value="${r.qty??''}" data-i="${i}" data-f="qty">
+      <select data-i="${i}" data-f="unit">${opts}</select>
+      <input type="number" min="0" step="any" placeholder="0.00" value="${r.cost??''}" data-i="${i}" data-f="cost">
+      <input type="number" min="1" max="100" step="any" placeholder="100" value="${r.yield??100}" data-i="${i}" data-f="yield">
+      <button class="del" data-del="${i}" title="Remove">×</button>`;
+    return div;
+  }
+
+  function render(){
+    rowsEl.innerHTML = '';
+    data.forEach((r,i)=> rowsEl.appendChild(rowTemplate(r,i)));
+    compute();
+  }
+
+  function compute(){
+    let total = 0;
+    data.forEach(r=>{
+      const qty = parseFloat(r.qty)||0;
+      const cost = parseFloat(r.cost)||0;
+      const y = (parseFloat(r.yield)||100)/100;
+      const base = unitFactor(qty, r.unit) * cost;
+      const line = y>0 ? base / y : base;
+      total += line;
+    });
+    const portions = Math.max(1, parseInt(document.getElementById('portions').value)||1);
+    const price = parseFloat(document.getElementById('price').value)||0;
+    const target = (parseFloat(document.getElementById('target').value)||0)/100;
+    const perPortion = total / portions;
+    const fc = price>0 ? (perPortion/price)*100 : 0;
+    const cm = price - perPortion;
+    const suggested = target>0 ? perPortion/target : 0;
+
+    document.getElementById('o-total').textContent = fmt(total);
+    document.getElementById('o-portion').textContent = fmt(perPortion);
+    document.getElementById('o-fc').textContent = price>0 ? pct(fc) : '—';
+    document.getElementById('o-cm').textContent = price>0 ? fmt(cm) : '—';
+    document.getElementById('o-suggested').textContent = fmt(suggested);
+    document.getElementById('o-suggested-sub').textContent = 'at ' + (target*100).toFixed(0) + '% target';
+
+    // benchmark badge
+    const sel = document.getElementById('concept').selectedOptions[0];
+    const lo = +sel.dataset.lo, hi = +sel.dataset.hi;
+    const badge = document.getElementById('o-fc-badge');
+    if(price<=0){ badge.textContent='enter a price'; badge.className='badge b-warn'; }
+    else if(fc < lo){ badge.textContent='below benchmark · high margin'; badge.className='badge b-good'; }
+    else if(fc <= hi){ badge.textContent='within '+lo+'–'+hi+'% benchmark'; badge.className='badge b-good'; }
+    else if(fc <= hi+4){ badge.textContent='above benchmark · review'; badge.className='badge b-warn'; }
+    else { badge.textContent='well above benchmark · reprice'; badge.className='badge b-bad'; }
+  }
+
+  // events
+  rowsEl.addEventListener('input', e=>{
+    const i = e.target.dataset.i, f = e.target.dataset.f;
+    if(i!==undefined){ data[i][f] = e.target.value; compute(); }
+  });
+  rowsEl.addEventListener('change', e=>{
+    const i = e.target.dataset.i, f = e.target.dataset.f;
+    if(i!==undefined && f==='unit'){ data[i][f] = e.target.value; compute(); }
+  });
+  rowsEl.addEventListener('click', e=>{
+    if(e.target.dataset.del!==undefined){ data.splice(+e.target.dataset.del,1); render(); }
+  });
+  document.getElementById('addRow').addEventListener('click', ()=>{
+    data.push({name:'',qty:'',unit:'g',cost:'',yield:100}); render();
+    rowsEl.lastChild.querySelector('input').focus();
+  });
+  ['portions','price','target','concept'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', compute);
+    document.getElementById(id).addEventListener('change', compute);
+  });
+
+  document.getElementById('loadExample').addEventListener('click', ()=>{
+    data = [
+      {name:'Arborio rice', qty:400, unit:'g',  cost:2.20, yield:100},
+      {name:'White wine',   qty:100, unit:'ml', cost:8.00, yield:100},
+      {name:'Parmesan',     qty:80,  unit:'g',  cost:18.00,yield:100},
+      {name:'Butter',       qty:60,  unit:'g',  cost:6.00, yield:100},
+      {name:'Shallots',     qty:100, unit:'g',  cost:1.80, yield:88},
+      {name:'Chicken stock',qty:800, unit:'ml', cost:1.50, yield:100},
+      {name:'Olive oil',    qty:20,  unit:'ml', cost:4.00, yield:100}
+    ];
+    document.getElementById('portions').value = 4;
+    document.getElementById('price').value = 16.00;
+    document.getElementById('target').value = 30;
+    render();
+  });
+
+  // seed
+  data = [
+    {name:'',qty:'',unit:'g',cost:'',yield:100},
+    {name:'',qty:'',unit:'g',cost:'',yield:100}
+  ];
+  render();
+})();
+</script>
+</body>
+</html>
