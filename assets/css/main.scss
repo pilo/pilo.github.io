@@ -1,0 +1,78 @@
+---
+---
+
+@import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}";
+@import "minimal-mistakes";
+
+/* ── Projects grid ── */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.project-card {
+  background: #fff;
+  border: 1px solid #e4e4e4;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+}
+
+.project-card__accent {
+  height: 4px;
+}
+
+.project-card__body {
+  padding: 1.3rem 1.4rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.project-card__tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
+  margin-bottom: 0.75rem;
+}
+
+.project-card__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: #1a1a1a;
+}
+
+.project-card__desc {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.55;
+  flex: 1;
+  margin-bottom: 1.2rem;
+}
+
+/* Category colour variants */
+.project-card--cost    .project-card__accent { background: #2196f3; }
+.project-card--cost    .project-card__tag    { background: #e3f2fd; color: #1565c0; }
+
+.project-card--menu    .project-card__accent { background: #43a047; }
+.project-card--menu    .project-card__tag    { background: #e8f5e9; color: #2e7d32; }
+
+.project-card--bev     .project-card__accent { background: #e67e22; }
+.project-card--bev     .project-card__tag    { background: #fef3e2; color: #b7500a; }
+
+.project-card--finance .project-card__accent { background: #7b61ff; }
+.project-card--finance .project-card__tag    { background: #f0edff; color: #4527a0; }
