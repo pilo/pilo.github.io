@@ -16,6 +16,10 @@ projects:
     category: "Menu Profitability"
     description: "Plot dishes by popularity and contribution margin into Stars, Plowhorses, Puzzles, and Dogs using the Kasavana–Smith model."
     url: "/tools/menu-engineering.html"
+  - title: "TCO Comparison Tool"
+    category: "Sourcing Strategy · Total Cost of Ownership"
+    description: "Compare suppliers on true landed cost across acquisition, ownership, and end-of-life — proving the cheapest unit price is rarely the cheapest supplier."
+    url: "/tools/tco-comparison.html"
 ---
 
 F&B procurement and cost-control tools I'm building as I train toward RNCP certification. Each one turns a standard industry framework into something I can run on real numbers — the way a hotel-group buyer or cost controller would.
