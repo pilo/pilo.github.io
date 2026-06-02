@@ -33,7 +33,7 @@ author:
       icon: "fab fa-fw fa-linkedin"
       url: "https://www.linkedin.com/in/riccardo-pili-82686040a/"
     - label: "E-Mail"
-      icon: "fab fa-fw fa-envelope"
+      icon: "fas fa-fw fa-envelope"
       url: "mailto:riccardo.pili@gmail.com"
 
 # --- Tell Jekyll to build files inside _pages ---
