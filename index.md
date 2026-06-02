@@ -1,5 +1,6 @@
 ---
 layout: home
+title: "Hi, I'm Pilo, exploring procurement, operations & automation in F&B"
 author_profile: true
 ---
 Hi, I'm Pilo, exploring procurement, operations & automation in F&B
