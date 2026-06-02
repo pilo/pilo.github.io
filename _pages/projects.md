@@ -29,7 +29,7 @@ F&B management tools built to simplify restaurant operations.
     </div>
   </div>
 
-  <div class="project-card project-card--menu">
+  <div class="project-card project-card--finance">
     <div class="project-card__accent"></div>
     <div class="project-card__body">
       <span class="project-card__tag">Supplier Scorecard</span>
