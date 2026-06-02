@@ -2,7 +2,7 @@
 title: "Projects"
 permalink: /projects/
 layout: single
-author_profile: false
+author_profile: true
 ---
 
 F&B management tools built to simplify restaurant operations.
