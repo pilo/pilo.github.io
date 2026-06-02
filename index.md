@@ -2,7 +2,7 @@
 layout: home
 author_profile: true
 ---
-### Hi, I'm Pilo exploring procurement, operations & automation in F&B
+Hi, I'm Pilo, exploring procurement, operations & automation in F&B
 
 Welcome to my procurement portfolio! This is **not a CV** — it's a living collection of tools, projects, and study materials I'm building as I deep-dive into the F&B procurement and operations space.
 
