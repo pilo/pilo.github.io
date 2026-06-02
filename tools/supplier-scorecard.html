@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplier Scorecard — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C;
+    --good:#2E7D5B; --warn:#C8943B; --bad:#A23B2E;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),
+                     radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;min-height:100vh;
+    padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;
+  }
+  .wrap{max-width:1120px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:.2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:34px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:62ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+
+  .grid{display:grid;grid-template-columns:1.55fr 1fr;gap:26px;align-items:start}
+  @media(max-width:880px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .15s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:18px 22px 22px}
+
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:20px}
+  .field label{display:block;font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:5px}
+  input,select{font-family:inherit;font-size:.92rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;transition:.15s}
+  input:focus,select:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+
+  /* kpi rows */
+  .kpi{padding:14px 0;border-top:1px solid var(--line)}
+  .kpi-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+  .kpi-name{font-weight:600;font-size:.98rem}
+  .kpi-name button.info{background:none;border:none;color:var(--brass);font-size:.72rem;cursor:pointer;margin-left:6px;text-decoration:underline;font-family:inherit}
+  .kpi-weight{display:flex;align-items:center;gap:6px;font-family:'Spline Sans Mono',monospace;font-size:.82rem;color:var(--ink-soft)}
+  .kpi-weight input{width:58px;text-align:right;padding:6px 8px;font-family:'Spline Sans Mono',monospace}
+  .kpi-controls{display:flex;align-items:center;gap:14px;margin-top:11px}
+  .score-pills{display:flex;gap:6px}
+  .pill{width:38px;height:38px;border:1px solid var(--line);background:var(--paper);border-radius:9px;font-family:'Spline Sans Mono',monospace;font-size:.95rem;color:var(--ink-soft);cursor:pointer;transition:.15s;font-weight:500}
+  .pill:hover{border-color:var(--pine-soft)}
+  .pill.on{background:var(--pine);color:var(--paper);border-color:var(--pine);transform:translateY(-1px)}
+  .kpi-weighted{font-family:'Spline Sans Mono',monospace;font-size:.82rem;color:var(--ink-soft);margin-left:auto;white-space:nowrap}
+  .kpi-weighted b{color:var(--ink);font-weight:600}
+  .rubric{font-size:.78rem;color:var(--ink-soft);margin-top:10px;padding:11px 13px;background:var(--paper);border-radius:9px;border:1px solid var(--line);display:none;line-height:1.55}
+  .rubric.show{display:block}
+  .rubric .def{color:var(--ink);margin-bottom:6px}
+  .rubric table{width:100%;border-collapse:collapse;margin-top:4px}
+  .rubric td{padding:2px 0;vertical-align:top}
+  .rubric td:first-child{width:26px;font-family:'Spline Sans Mono',monospace;color:var(--pine);font-weight:600}
+
+  .weight-warn{font-size:.76rem;color:var(--bad);margin-top:10px;font-weight:600;display:none}
+  .weight-warn.show{display:block}
+
+  /* results */
+  .results{position:sticky;top:24px}
+  .score-hero{text-align:center;padding:8px 0 18px;border-bottom:1px dashed var(--line)}
+  .score-num{font-family:'Spline Sans Mono',monospace;font-size:3.4rem;font-weight:500;line-height:1;color:var(--pine);letter-spacing:-.02em}
+  .score-num span{font-size:1.3rem;color:var(--ink-soft)}
+  .rating{display:inline-block;font-family:'Fraunces',serif;font-style:italic;font-size:1.3rem;margin-top:10px;padding:3px 16px;border-radius:999px}
+  .r-excellent{background:rgba(46,125,91,.14);color:var(--good)}
+  .r-good{background:rgba(15,76,69,.12);color:var(--pine)}
+  .r-acceptable{background:rgba(200,148,59,.18);color:#9a6f1f}
+  .r-risk{background:rgba(176,80,44,.16);color:#9a4326}
+  .r-unacceptable{background:rgba(162,59,46,.15);color:var(--bad)}
+  .action{font-size:.88rem;color:var(--ink-soft);margin-top:16px;line-height:1.5;text-align:center}
+  .action b{color:var(--ink)}
+  svg.radar{display:block;margin:6px auto 0;max-width:100%}
+  .print-btn{width:100%;margin-top:18px;font-family:inherit;font-size:.86rem;font-weight:600;background:var(--ink);color:var(--paper);border:none;padding:11px;border-radius:9px;cursor:pointer;transition:.2s}
+  .print-btn:hover{background:#000}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+  @media print{
+    body{background:#fff;padding:20px}
+    .topbar,.back,.print-btn,footer,.rubric,.kpi-name button.info{display:none!important}
+    .card{box-shadow:none;animation:none;opacity:1;break-inside:avoid}
+    .results{position:static}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="mark">F&amp;B Procurement Toolkit</span>
+    <a class="back" href="/projects/">← All tools</a>
+  </div>
+
+  <header class="hero">
+    <div class="eyebrow">Supplier Management · Domain — Vendor Performance</div>
+    <h1>Supplier <em>Scorecard</em></h1>
+    <p class="lede">Score a supplier across six weighted KPIs to generate an objective performance rating and recommended action. The instrument a category buyer brings to a quarterly business review (QBR) — for monitoring, renegotiation leverage, and retain / develop / replace decisions.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="hd"><h2>Evaluation</h2></div>
+      <div class="bd">
+        <div class="meta">
+          <div class="field"><label>Supplier name</label><input type="text" id="m-name" placeholder="e.g. Riviera Fresh Produce"></div>
+          <div class="field"><label>Category</label><input type="text" id="m-cat" placeholder="Fresh produce / Seafood / Dry goods"></div>
+          <div class="field"><label>Review period</label><input type="text" id="m-period" placeholder="Q1 2026"></div>
+          <div class="field"><label>Reviewer</label><input type="text" id="m-rev" placeholder="Your name"></div>
+        </div>
+        <div id="kpis"></div>
+        <p class="weight-warn" id="wWarn">Weights must total 100%. Current total: <span id="wTotal">100</span>%.</p>
+      </div>
+    </section>
+
+    <section class="card results">
+      <div class="hd"><h2>Result</h2></div>
+      <div class="bd">
+        <div class="score-hero">
+          <div class="score-num"><span id="r-num">0.00</span><span> / 5.00</span></div>
+          <div class="rating r-good" id="r-rating">—</div>
+        </div>
+        <svg class="radar" id="radar" viewBox="0 0 260 230" width="260" height="230" aria-label="KPI radar"></svg>
+        <p class="action" id="r-action">Score the KPIs to generate a rating and recommended action.</p>
+        <button class="print-btn" id="printBtn">Print / Save as PDF</button>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · Supplier evaluation &amp; development</span>
+    <span>Overall = Σ (weight × score) · scale 1 (poor) → 5 (excellent)</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const KPIS = [
+    {key:'otd', name:'On-Time Delivery', w:25,
+      def:'% of deliveries arriving on the agreed date and time window. (On time ÷ total) × 100.',
+      scale:['Below 85% on time','85–89%','90–94%','95–97%','98–100% on time']},
+    {key:'fill', name:'Fill Rate / Order Completeness', w:20,
+      def:'% of ordered lines delivered in full in a single delivery.',
+      scale:['Below 85%','85–89%','90–94%','95–97%','98–100%']},
+    {key:'qual', name:'Quality Conformance', w:25,
+      def:'% of deliveries meeting agreed spec — weight, grade, temperature, packaging, shelf life.',
+      scale:['Recurring major issues / food-safety incident','6–10 issues or 2–3 major','3–5 minor or 1 major','1–2 minor non-conformances','Zero non-conformances']},
+    {key:'doc', name:'Invoice & Documentation Accuracy', w:15,
+      def:'% of invoices / delivery docs error-free and matching the PO.',
+      scale:['6+ errors / systematic discrepancies','4–5 errors','2–3 errors','1 error','100% accuracy']},
+    {key:'resp', name:'Responsiveness & Issue Resolution', w:10,
+      def:'Speed and quality of response to complaints, queries, incidents.',
+      scale:['Unresponsive / unresolved','Slow ack, resolve >72h','Next-day ack, resolve <72h','Same-day ack, resolve <48h','Same-day ack, resolve <24h']},
+    {key:'sust', name:'Sustainability & Compliance', w:5,
+      def:'Active sustainability practice + valid certifications (IFS, BRC, ISO 22000, MSC, organic…).',
+      scale:['Non-compliant / failed audit','Certification gaps or lapse','Most current, minor gaps','All required certs current','Multiple certs + proactive reporting']}
+  ];
+
+  const state = {};
+  KPIS.forEach(k=> state[k.key] = {score:0, w:k.w});
+
+  const kpisEl = document.getElementById('kpis');
+  KPIS.forEach(k=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'kpi';
+    wrap.innerHTML = `
+      <div class="kpi-top">
+        <div class="kpi-name">${k.name}<button class="info" data-info="${k.key}">guide</button></div>
+        <label class="kpi-weight">wt <input type="number" min="0" max="100" step="1" value="${k.w}" data-w="${k.key}">%</label>
+      </div>
+      <div class="kpi-controls">
+        <div class="score-pills" data-pills="${k.key}">
+          ${[1,2,3,4,5].map(n=>`<button class="pill" data-score="${k.key}" data-val="${n}">${n}</button>`).join('')}
+        </div>
+        <span class="kpi-weighted" data-wtd="${k.key}">weighted <b>0.00</b></span>
+      </div>
+      <div class="rubric" data-rubric="${k.key}">
+        <div class="def">${k.def}</div>
+        <table>${k.scale.map((s,i)=>`<tr><td>${i+1}</td><td>${s}</td></tr>`).join('')}</table>
+      </div>`;
+    kpisEl.appendChild(wrap);
+  });
+
+  function compute(){
+    let wTotal = 0, weighted = 0;
+    KPIS.forEach(k=>{
+      const w = state[k.key].w, s = state[k.key].score;
+      wTotal += w;
+      const wtd = (w/100)*s;
+      weighted += wtd;
+      document.querySelector(`[data-wtd="${k.key}"] b`).textContent = wtd.toFixed(2);
+    });
+
+    document.getElementById('wTotal').textContent = wTotal;
+    document.getElementById('wWarn').classList.toggle('show', wTotal!==100);
+
+    // normalise if weights don't sum to 100 so the /5 score stays meaningful
+    const overall = wTotal>0 ? weighted * (100/wTotal) : 0;
+    document.getElementById('r-num').textContent = overall.toFixed(2);
+
+    const anyScored = KPIS.some(k=>state[k.key].score>0);
+    const ratingEl = document.getElementById('r-rating');
+    const actionEl = document.getElementById('r-action');
+    let cls='r-good', label='—', action='Score the KPIs to generate a rating and recommended action.';
+    if(anyScored){
+      if(overall>=4.5){cls='r-excellent';label='Excellent';action='<b>Preferred supplier status.</b> Consider a strategic partnership, volume commitment, or multi-year price stability in the next negotiation.';}
+      else if(overall>=3.5){cls='r-good';label='Good';action='<b>Maintain.</b> Identify one improvement area and set it as a target for the next review period.';}
+      else if(overall>=2.5){cls='r-acceptable';label='Acceptable';action='<b>Formal improvement plan required within 30 days.</b> Agree corrective actions with owners and deadlines.';}
+      else if(overall>=1.5){cls='r-risk';label='At risk';action='<b>90-day improvement notice.</b> Begin qualifying alternative sources in parallel.';}
+      else {cls='r-unacceptable';label='Unacceptable';action='<b>Immediate review.</b> Initiate sourcing change; escalate any food-safety failure at once.';}
+    }
+    ratingEl.className = 'rating '+cls;
+    ratingEl.textContent = label;
+    actionEl.innerHTML = action;
+
+    drawRadar();
+  }
+
+  // radar
+  function drawRadar(){
+    const svg = document.getElementById('radar');
+    const cx=130, cy=112, R=82, N=KPIS.length;
+    const pt = (i, r)=>{
+      const a = -Math.PI/2 + i*2*Math.PI/N;
+      return [cx + r*Math.cos(a), cy + r*Math.sin(a)];
+    };
+    let g = '';
+    // rings
+    [0.25,0.5,0.75,1].forEach(f=>{
+      const pts = KPIS.map((_,i)=>pt(i,R*f).join(',')).join(' ');
+      g += `<polygon points="${pts}" fill="none" stroke="rgba(27,26,22,.12)" stroke-width="1"/>`;
+    });
+    // spokes + labels
+    const short = ['Delivery','Fill rate','Quality','Docs','Response','Sustain.'];
+    KPIS.forEach((k,i)=>{
+      const [x,y]=pt(i,R);
+      g += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(27,26,22,.1)" stroke-width="1"/>`;
+      const [lx,ly]=pt(i,R+15);
+      const anchor = Math.abs(lx-cx)<6 ? 'middle' : (lx<cx?'end':'start');
+      g += `<text x="${lx}" y="${ly+3}" font-size="8.5" fill="#5C574B" text-anchor="${anchor}" font-family="Hanken Grotesk,sans-serif">${short[i]}</text>`;
+    });
+    // data
+    const dpts = KPIS.map((k,i)=>pt(i, R*(state[k.key].score/5)).join(',')).join(' ');
+    g += `<polygon points="${dpts}" fill="rgba(15,76,69,.18)" stroke="#0F4C45" stroke-width="1.8"/>`;
+    KPIS.forEach((k,i)=>{ if(state[k.key].score>0){ const [x,y]=pt(i,R*(state[k.key].score/5)); g+=`<circle cx="${x}" cy="${y}" r="2.6" fill="#0F4C45"/>`; }});
+    svg.innerHTML = g;
+  }
+
+  // events
+  kpisEl.addEventListener('click', e=>{
+    if(e.target.dataset.score){
+      const key=e.target.dataset.score, val=+e.target.dataset.val;
+      state[key].score = val;
+      document.querySelectorAll(`[data-pills="${key}"] .pill`).forEach(p=>{
+        p.classList.toggle('on', +p.dataset.val===val);
+      });
+      compute();
+    }
+    if(e.target.dataset.info){
+      const r=document.querySelector(`[data-rubric="${e.target.dataset.info}"]`);
+      r.classList.toggle('show');
+    }
+  });
+  kpisEl.addEventListener('input', e=>{
+    if(e.target.dataset.w){
+      state[e.target.dataset.w].w = parseFloat(e.target.value)||0;
+      compute();
+    }
+  });
+  document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+
+  compute();
+})();
+</script>
+</body>
+</html>
