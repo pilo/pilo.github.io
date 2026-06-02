@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="{{ page.lang | default: site.lang | default: "en" }}">
 
@@ -14,7 +15,26 @@
 
   <body>
     <div class="wrapper">
-      {% include header.html %}
+      <header>
+        <h1><a href="{{ "/" | absolute_url }}">{{ site.title }}</a></h1>
+        
+        {% if site.description %}
+        <p class="description">{{ site.description }}</p>
+        {% endif %}
+
+        <!-- Navigation bar -->
+        <nav class="navigation" style="margin-top: 15px;">
+          <a href="{{ "/" | absolute_url }}" style="margin-right: 15px; text-decoration: none; color: inherit;">Home</a>
+          <a href="{{ "/about.html" | absolute_url }}" style="margin-right: 15px; text-decoration: none; color: inherit;">About</a>
+          <a href="{{ "/projects.html" | absolute_url }}" style="text-decoration: none; color: inherit;">Projects</a>
+        </nav>
+
+        {% if page.url != "/" %}
+        <nav style="margin-top: 20px;">
+          <a href="{{ "/" | absolute_url }}" style="float: right; text-decoration: none;">← Home</a>
+        </nav>
+        {% endif %}
+      </header>
 
       <section>
         {{ content }}
