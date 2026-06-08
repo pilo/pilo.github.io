@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seasonal Break-Even Map · Côte d'Azur</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Manrope:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c1620;--bg2:#0f1d29;--panel:#13212e;--panel2:#172a39;--line:#23394a;
+    --ink:#e8e2d4;--ink-dim:#9fb0bd;--ink-faint:#67808f;
+    --brass:#c9a24b;--brass-soft:#e0c179;--teal:#3fb6a8;--teal-soft:#6fd3c6;
+    --coral:#d2724f;--coral-soft:#e89878;--violet:#8a7fb5;--radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(201,162,75,.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(63,182,168,.08), transparent 55%),
+      linear-gradient(180deg,var(--bg),var(--bg2));
+    color:var(--ink);font-family:"Manrope",system-ui,sans-serif;line-height:1.5;
+    min-height:100vh;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:38px 22px 80px;}
+  header{margin-bottom:30px;}
+  .eyebrow{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--brass);margin:0 0 14px;}
+  h1{font-family:"Marcellus",serif;font-weight:400;font-size:clamp(30px,6vw,52px);line-height:1.04;margin:0 0 12px;letter-spacing:.01em;}
+  h1 em{color:var(--brass-soft);font-style:italic;}
+  .lede{color:var(--ink-dim);max-width:64ch;font-size:15px;font-weight:300;}
+  .rule{height:1px;background:linear-gradient(90deg,var(--brass),transparent);margin:26px 0 0;}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:28px 0 6px;}
+  .kpi{background:linear-gradient(160deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);padding:16px 16px 14px;position:relative;overflow:hidden;}
+  .kpi::before{content:"";position:absolute;inset:0 auto 0 0;width:3px;background:var(--brass);opacity:.65;}
+  .kpi .lab{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);}
+  .kpi .val{font-family:"Marcellus",serif;font-size:clamp(20px,3.2vw,29px);margin-top:7px;line-height:1;}
+  .kpi .sub{font-size:11px;color:var(--ink-dim);margin-top:6px;font-family:"DM Mono",monospace;}
+  .val.pos{color:var(--teal-soft);}.val.neg{color:var(--coral-soft);}
+  section{margin-top:34px;}
+  .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  h2{font-family:"Marcellus",serif;font-weight:400;font-size:21px;margin:0;letter-spacing:.01em;}
+  .sec-note{color:var(--ink-faint);font-size:12.5px;max-width:52ch;font-weight:300;}
+  .card{background:linear-gradient(165deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:var(--radius);padding:20px;}
+  .chart-host{width:100%;}
+  svg.chart{width:100%;height:auto;display:block;overflow:visible;}
+  .axis-lbl{font-family:"DM Mono",monospace;font-size:10px;fill:var(--ink-faint);}
+  .be-tag{font-family:"DM Mono",monospace;font-size:11px;fill:var(--brass-soft);}
+  .step-tag{font-family:"DM Mono",monospace;font-size:9px;fill:var(--violet);}
+  .gop-tag{font-family:"Marcellus",serif;font-size:13px;}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--ink-dim);font-family:"DM Mono",monospace;}
+  .legend span{display:inline-flex;align-items:center;gap:7px;}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block;}
+  .diamond{width:9px;height:9px;background:var(--violet);transform:rotate(45deg);display:inline-block;}
+  .inputs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px 18px;}
+  .field{display:flex;flex-direction:column;gap:5px;}
+  .field label{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);}
+  .field .hint{font-size:10.5px;color:var(--ink-faint);font-weight:300;}
+  input[type=number],input.txt{background:#0b141d;border:1px solid var(--line);color:var(--ink);font-family:"DM Mono",monospace;font-size:14px;padding:9px 11px;border-radius:9px;width:100%;}
+  input:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 2px rgba(201,162,75,.18);}
+  .tbl-scroll{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--line);}
+  table{border-collapse:collapse;width:100%;min-width:880px;font-size:13px;}
+  thead th{font-family:"DM Mono",monospace;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-align:right;padding:12px 9px;background:#101d28;border-bottom:1px solid var(--line);}
+  thead th:first-child{text-align:left;}
+  tbody td{padding:6px 9px;text-align:right;border-bottom:1px solid rgba(35,57,74,.5);font-family:"DM Mono",monospace;vertical-align:middle;}
+  tbody td:first-child{text-align:left;font-family:"Manrope",sans-serif;font-weight:500;}
+  tbody tr.main:hover{background:rgba(23,42,57,.4);}
+  tbody input{width:62px;background:transparent;border:1px solid transparent;color:var(--ink);font-family:"DM Mono",monospace;font-size:13px;text-align:right;padding:5px 6px;border-radius:6px;}
+  tbody input:hover{border-color:var(--line);}
+  tbody input:focus{outline:none;border-color:var(--brass);background:#0b141d;}
+  td.name input{width:118px;text-align:left;}
+  .verdict{display:inline-block;font-family:"DM Mono",monospace;font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:20px;border:1px solid;white-space:nowrap;}
+  .v-open{color:var(--teal-soft);border-color:rgba(63,182,168,.45);background:rgba(63,182,168,.08);}
+  .v-marg{color:var(--brass-soft);border-color:rgba(201,162,75,.45);background:rgba(201,162,75,.08);}
+  .v-close{color:var(--coral-soft);border-color:rgba(210,114,79,.45);background:rgba(210,114,79,.08);}
+  .v-shut{color:var(--ink-faint);border-color:var(--line);}
+  .bar-cell{position:relative;min-width:80px;}
+  .barbg{position:absolute;left:9px;right:9px;top:50%;transform:translateY(-50%);height:6px;border-radius:4px;background:#0b141d;overflow:hidden;}
+  .barfill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;}
+  .toggle{cursor:pointer;font-family:"DM Mono",monospace;font-size:11px;padding:4px 9px;border-radius:7px;border:1px solid var(--line);background:#0b141d;color:var(--ink-dim);}
+  .toggle.on{color:var(--teal-soft);border-color:rgba(63,182,168,.4);}
+  .toggle.off{color:var(--coral-soft);border-color:rgba(210,114,79,.4);}
+  .mixbtn{cursor:pointer;font-family:"DM Mono",monospace;font-size:11px;color:var(--ink-dim);border:1px solid var(--line);background:#0b141d;border-radius:7px;padding:4px 7px;white-space:nowrap;}
+  .mixbtn.ovr{color:var(--brass-soft);border-color:rgba(201,162,75,.4);}
+  .steptags{display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap;}
+  .stepchip{font-family:"DM Mono",monospace;font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--violet);border:1px solid rgba(138,127,181,.4);background:rgba(138,127,181,.08);border-radius:20px;padding:2px 6px;}
+  .row-del{cursor:pointer;color:var(--ink-faint);border:none;background:none;font-size:15px;padding:2px 6px;}
+  .row-del:hover{color:var(--coral-soft);}
+  tr.detail td{background:#0b141d;padding:14px 16px;}
+  .mixwrap{display:flex;flex-wrap:wrap;gap:14px 20px;align-items:flex-end;}
+  .mixwrap .mh{font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);width:100%;}
+  .mixitem{display:flex;flex-direction:column;gap:4px;}
+  .mixitem label{font-family:"DM Mono",monospace;font-size:10px;color:var(--ink-dim);}
+  .mixitem input{width:64px;background:#13212e;border:1px solid var(--line);text-align:right;}
+  .mixmeta{font-family:"DM Mono",monospace;font-size:11px;color:var(--ink-dim);margin-left:auto;}
+  .mixmeta b{color:var(--brass-soft);}
+  .lnk{cursor:pointer;color:var(--ink-faint);text-decoration:underline;font-size:11px;font-family:"DM Mono",monospace;}
+  .lnk:hover{color:var(--coral-soft);}
+  tfoot td{padding:11px 9px;font-family:"DM Mono",monospace;font-size:12px;text-align:right;border-top:1px solid var(--brass);color:var(--ink);}
+  tfoot td:first-child{text-align:left;font-family:"Marcellus",serif;color:var(--brass-soft);font-size:14px;}
+  .btn-row{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;}
+  button.act{font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:1px solid var(--brass);color:var(--brass-soft);padding:10px 16px;border-radius:9px;cursor:pointer;transition:.18s;}
+  button.act:hover{background:var(--brass);color:#0c1620;}
+  button.act.ghost{border-color:var(--line);color:var(--ink-dim);}
+  button.act.ghost:hover{background:var(--panel2);color:var(--ink);}
+  .pos{color:var(--teal-soft);}.neg{color:var(--coral-soft);}
+  .read{color:var(--ink-dim);font-size:13.5px;line-height:1.7;font-weight:300;}
+  .read b{color:var(--ink);font-weight:600;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .steptbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .steptbl th{font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);text-align:right;padding:8px 6px;border-bottom:1px solid var(--line);}
+  .steptbl th:first-child{text-align:left;}
+  .steptbl td{padding:5px 6px;text-align:right;font-family:"DM Mono",monospace;border-bottom:1px solid rgba(35,57,74,.45);}
+  .steptbl td:first-child{text-align:left;}
+  .steptbl input{width:70px;background:transparent;border:1px solid transparent;color:var(--ink);font-family:"DM Mono",monospace;font-size:12.5px;text-align:right;padding:4px 5px;border-radius:6px;}
+  .steptbl input.txt{width:130px;text-align:left;}
+  .steptbl input:hover{border-color:var(--line);}
+  .steptbl input:focus{outline:none;border-color:var(--brass);background:#0b141d;}
+  footer{margin-top:50px;color:var(--ink-faint);font-size:11.5px;font-family:"DM Mono",monospace;text-align:center;border-top:1px solid var(--line);padding-top:22px;}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr);}.inputs-grid{grid-template-columns:repeat(2,1fr);}.grid2{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Revenue Management · Recovery Ledger</p>
+    <h1>Seasonal Break-Even Map<br><em>Côte d'Azur</em></h1>
+    <p class="lede">One decision surface. Per-channel net rate (your mix shifts toward direct in compression weeks), seasonal step costs that trip when occupancy justifies opening the beach club or the second brigade, and the recovery line that shows the exact date your cumulative position clears the year-round nut.</p>
+    <div class="rule"></div>
+  </header>
+
+  <div class="kpis" id="kpis"></div>
+
+  <section>
+    <div class="sec-head"><h2>The recovery line</h2>
+      <p class="sec-note">Cumulative operating contribution — now net of channel cost and step costs — minus the year-round nut accrued to date. Crosses zero on your true break-even date; endpoint is GOP. Violet diamonds mark where a step cost first trips.</p></div>
+    <div class="card">
+      <div class="chart-host" id="chart"></div>
+      <div class="legend">
+        <span><i class="dot" style="background:var(--coral)"></i>Recovering</span>
+        <span><i class="dot" style="background:var(--teal)"></i>Surplus</span>
+        <span><i class="dot" style="background:var(--brass)"></i>Break-even</span>
+        <span><i class="diamond"></i>Step cost trips</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Property &amp; cost structure</h2>
+      <p class="sec-note">The unavoidable nut accrues whether open or shut. Season-committed daily cost is avoidable by closing. Step costs add on top, only where occupancy trips them.</p></div>
+    <div class="card"><div class="inputs-grid" id="config"></div></div>
+  </section>
+
+  <section>
+    <div class="grid2">
+      <div>
+        <div class="sec-head"><h2>Channels</h2></div>
+        <div class="card"><div id="channels"></div></div>
+      </div>
+      <div>
+        <div class="sec-head"><h2>Step costs</h2></div>
+        <div class="card">
+          <table class="steptbl"><thead><tr><th>Trigger</th><th>Occ ≥ %</th><th>€ / day</th><th>Annual</th><th></th></tr></thead>
+          <tbody id="stepbody"></tbody></table>
+          <div class="btn-row"><button class="act ghost" id="addStep">+ Add step cost</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head"><h2>Demand regimes</h2>
+      <p class="sec-note">Event weeks are split out. The Mix column is the period's blended distribution cost — open it to override the channel mix (defaults to global). Step chips show which step costs the period trips.</p></div>
+    <div class="tbl-scroll">
+      <table id="periods"><thead><tr>
+        <th>Period</th><th>Days</th><th>Occ %</th><th>ADR €</th><th>Mix dist%</th>
+        <th>Net contrib</th><th>Steps</th><th>Op. contrib</th><th>Carries</th><th>Verdict</th><th>State</th><th></th>
+      </tr></thead><tbody id="pbody"></tbody><tfoot id="pfoot"></tfoot></table>
+    </div>
+    <div class="btn-row">
+      <button class="act ghost" id="addRow">+ Add period</button>
+      <button class="act" id="reset">Reset Riviera defaults</button>
+    </div>
+  </section>
+
+  <section><div class="card"><p class="read" id="narrative"></p></div></section>
+  <footer>Illustrative model · calibrate every figure to your own P&amp;L before any decision · single file, host anywhere</footer>
+</div>
+
+<script>
+const DEFAULTS = {
+  config:{ keys:80, annualNut:5500000, cpor:75, seasonDaily:9000, ancillary:120 },
+  channels:[
+    {name:"Direct / Web", cost:4},
+    {name:"OTA", cost:19},
+    {name:"GDS / Corp", cost:13},
+    {name:"Wholesale / TO", cost:24}
+  ],
+  globalMix:[45,30,15,10],
+  steps:[
+    {name:"Beach club + 2nd restaurant", trig:70, daily:4500},
+    {name:"Extended F&B brigade", trig:55, daily:2000}
+  ],
+  periods:[
+    {name:"January",days:31,occ:0,adr:0,open:false,mix:null},
+    {name:"February",days:28,occ:0,adr:0,open:false,mix:null},
+    {name:"March",days:31,occ:35,adr:320,open:true,mix:[30,50,10,10]},
+    {name:"April",days:30,occ:55,adr:420,open:true,mix:null},
+    {name:"May (ex-event)",days:15,occ:65,adr:520,open:true,mix:null},
+    {name:"Cannes Festival",days:12,occ:95,adr:1400,open:true,mix:[65,15,15,5]},
+    {name:"Grand Prix",days:4,occ:98,adr:2200,open:true,mix:[70,10,15,5]},
+    {name:"June",days:30,occ:78,adr:680,open:true,mix:null},
+    {name:"July",days:31,occ:88,adr:850,open:true,mix:null},
+    {name:"August",days:31,occ:90,adr:920,open:true,mix:null},
+    {name:"Sept (ex-show)",days:26,occ:80,adr:720,open:true,mix:null},
+    {name:"Yacht Show",days:4,occ:96,adr:1600,open:true,mix:[68,12,15,5]},
+    {name:"October",days:31,occ:58,adr:480,open:true,mix:null},
+    {name:"November",days:30,occ:32,adr:340,open:true,mix:[25,55,10,10]},
+    {name:"Dec (ex-NYE)",days:26,occ:40,adr:400,open:true,mix:null},
+    {name:"New Year",days:5,occ:85,adr:1100,open:true,mix:[60,25,10,5]}
+  ]
+};
+let config, channels, globalMix, steps, periods;
+function load(){
+  config=JSON.parse(JSON.stringify(DEFAULTS.config));
+  channels=JSON.parse(JSON.stringify(DEFAULTS.channels));
+  globalMix=JSON.parse(JSON.stringify(DEFAULTS.globalMix));
+  steps=JSON.parse(JSON.stringify(DEFAULTS.steps));
+  periods=JSON.parse(JSON.stringify(DEFAULTS.periods));
+}
+load();
+let openDetails=new Set();
+
+const fmt=n=>(n<0?"-":"")+"€"+Math.abs(Math.round(n)).toLocaleString("en-US");
+const fmtK=n=>(n<0?"-":"")+"€"+(Math.abs(n)/1000).toFixed(0)+"k";
+const fmtM=n=>(n<0?"-":"")+"€"+(Math.abs(n)/1e6).toFixed(2)+"M";
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MD=[31,28,31,30,31,30,31,31,30,31,30,31];
+function dayToDate(d){let m=0,c=d;while(m<11&&c>MD[m]){c-=MD[m];m++;}return MONTHS[m]+" "+Math.max(1,Math.ceil(c));}
+
+function blendedDist(mixArr){
+  const sum=mixArr.reduce((s,v)=>s+(Number(v)||0),0)||1;
+  let d=0; channels.forEach((c,i)=>{ d += ((Number(mixArr[i])||0)/sum)*(Number(c.cost)||0); });
+  return d; // percent
+}
+
+function compute(){
+  const {keys,annualNut,cpor,seasonDaily,ancillary}=config;
+  let totDays=0; periods.forEach(p=>totDays+=Number(p.days)||0);
+  const nutDaily= totDays>0? annualNut/totDays : 0;
+  let cumOp=0,cumDays=0,prevNet=0,prevDay=0,beDay=null;
+  let tRoomRev=0,tOccRN=0,tNet=0,tAnc=0,tSeason=0,tStep=0,tDistCost=0;
+  const rows=[],pts=[{day:0,net:0}];
+  const stepFirstDay={};
+  let runStart=0;
+  periods.forEach(p=>{
+    const days=Number(p.days)||0, occ=(Number(p.occ)||0)/100, adr=Number(p.adr)||0;
+    const avail=days*keys, occRN=p.open?avail*occ:0, roomRev=occRN*adr;
+    const mixArr=p.mix||globalMix;
+    const dist=blendedDist(mixArr);
+    const distCost=roomRev*dist/100;
+    const net=roomRev - distCost - occRN*cpor;
+    const anc=occRN*ancillary;
+    const season=p.open?days*seasonDaily:0;
+    let stepCost=0; const activeSteps=[];
+    if(p.open){ steps.forEach((s,si)=>{ if((Number(p.occ)||0) >= (Number(s.trig)||0)){
+      stepCost += (Number(s.daily)||0)*days; activeSteps.push(si);
+      if(stepFirstDay[si]===undefined) stepFirstDay[si]=runStart;
+    }});}
+    const op=net+anc-season-stepCost;
+    let verdict;
+    if(!p.open) verdict="shut";
+    else if(op>=0) verdict="open";
+    else if(net+anc>0) verdict="marg";
+    else verdict="close";
+    tRoomRev+=roomRev;tOccRN+=occRN;tNet+=net;tAnc+=anc;tSeason+=season;tStep+=stepCost;tDistCost+=distCost;
+    cumOp+=op; runStart+=days; cumDays+=days;
+    const netPos=cumOp-nutDaily*cumDays;
+    if(beDay===null&&prevNet<0&&netPos>=0){const f=(0-prevNet)/(netPos-prevNet);beDay=prevDay+f*(cumDays-prevDay);}
+    rows.push({p,occRN,roomRev,dist,net,anc,season,stepCost,op,verdict,activeSteps});
+    pts.push({day:cumDays,net:netPos});
+    prevNet=netPos;prevDay=cumDays;
+  });
+  const gop=cumOp-annualNut, availTot=keys*totDays;
+  return {rows,pts,gop,beDay,totDays,nutDaily,stepFirstDay,
+    revpar:availTot?tRoomRev/availTot:0, goppar:availTot?gop/availTot:0,
+    occOverall:availTot?tOccRN/availTot:0, adrBlend:tOccRN?tRoomRev/tOccRN:0,
+    distBlend:tRoomRev?tDistCost/tRoomRev*100:0,
+    tRoomRev,tNet,tAnc,tSeason,tStep,tOp:cumOp,annualNut,
+    maxCarry:Math.max(...rows.map(r=>r.op),1)};
+}
+
+function renderKPIs(m){
+  const be=m.beDay?dayToDate(m.beDay):"Never clears";
+  const k=[
+    {lab:"Annual GOP",val:fmtM(m.gop),cls:m.gop>=0?"pos":"neg",sub:"GOPPAR "+fmt(m.goppar)},
+    {lab:"Break-even date",val:be,cls:m.beDay?"":"neg",sub:"nut cleared"},
+    {lab:"RevPAR",val:fmt(m.revpar),sub:(m.occOverall*100).toFixed(0)+"% · ADR "+fmt(m.adrBlend)},
+    {lab:"Fixed load",val:fmtM(m.annualNut+m.tSeason+m.tStep),sub:"nut + "+fmtK(m.tSeason)+" season + "+fmtK(m.tStep)+" steps"}
+  ];
+  document.getElementById("kpis").innerHTML=k.map(x=>
+    `<div class="kpi"><div class="lab">${x.lab}</div><div class="val ${x.cls||''}">${x.val}</div><div class="sub">${x.sub}</div></div>`).join("");
+}
+
+function renderChart(m){
+  const W=1000,H=380,padL=72,padR=24,padT=26,padB=34,pw=W-padL-padR,ph=H-padT-padB;
+  const xs=d=>padL+(d/m.totDays)*pw;
+  const vals=m.pts.map(p=>p.net); let lo=Math.min(0,...vals),hi=Math.max(0,...vals);
+  const padv=(hi-lo)*0.10||1; lo-=padv; hi+=padv;
+  const ys=v=>padT+(1-(v-lo)/(hi-lo))*ph; const zeroY=ys(0);
+  const lpts=m.pts.map(p=>`${xs(p.day).toFixed(1)},${ys(p.net).toFixed(1)}`);
+  const lineD="M"+lpts.join(" L");
+  const areaD="M"+xs(0)+","+zeroY+" L"+lpts.join(" L")+" L"+xs(m.totDays)+","+zeroY+" Z";
+  let yt=""; for(let i=0;i<=5;i++){const v=lo+(hi-lo)*i/5,y=ys(v);
+    yt+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--line)" stroke-width="1" opacity="${v===0?0:.5}"/><text class="axis-lbl" x="${padL-8}" y="${y+3}" text-anchor="end">${fmtK(v)}</text>`;}
+  let xt="",acc=0; for(let i=0;i<12;i++){acc+=MD[i];const x=xs(acc);
+    if(i<11)xt+=`<line x1="${x}" y1="${padT}" x2="${x}" y2="${H-padB}" stroke="var(--line)" stroke-width="1" opacity=".22"/>`;
+    xt+=`<text class="axis-lbl" x="${xs(acc-MD[i]/2)}" y="${H-padB+18}" text-anchor="middle">${MONTHS[i]}</text>`;}
+  let beMark=""; if(m.beDay){const bx=xs(m.beDay);
+    beMark=`<line x1="${bx}" y1="${padT}" x2="${bx}" y2="${H-padB}" stroke="var(--brass)" stroke-width="1.4" stroke-dasharray="4 4"/><circle cx="${bx}" cy="${zeroY}" r="5" fill="var(--brass)"/><text class="be-tag" x="${bx+8}" y="${padT+13}">break-even · ${dayToDate(m.beDay)}</text>`;}
+  let stepMark=""; let lane=0;
+  Object.keys(m.stepFirstDay).forEach(si=>{const d=m.stepFirstDay[si];const x=xs(d);const y=H-padB-6-(lane%2)*14;
+    stepMark+=`<rect x="${x-4}" y="${y-4}" width="8" height="8" fill="var(--violet)" transform="rotate(45 ${x} ${y})"/><text class="step-tag" x="${x+7}" y="${y+3}">${(steps[si]?.name||'step').split(' ')[0]}</text>`;lane++;});
+  const ex=xs(m.totDays),ey=ys(m.pts[m.pts.length-1].net),gc=m.gop>=0?"var(--teal-soft)":"var(--coral-soft)";
+  const gopMark=`<circle cx="${ex}" cy="${ey}" r="5" fill="${gc}"/><text class="gop-tag" x="${ex}" y="${ey-12}" text-anchor="end" fill="${gc}">GOP ${fmtM(m.gop)}</text>`;
+  document.getElementById("chart").innerHTML=
+   `<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet"><defs>
+      <clipPath id="ca"><rect x="0" y="0" width="${W}" height="${zeroY}"/></clipPath>
+      <clipPath id="cb"><rect x="0" y="${zeroY}" width="${W}" height="${H-zeroY}"/></clipPath>
+      <linearGradient id="gpos" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--teal)" stop-opacity=".38"/><stop offset="1" stop-color="var(--teal)" stop-opacity="0"/></linearGradient>
+      <linearGradient id="gneg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="var(--coral)" stop-opacity=".34"/><stop offset="1" stop-color="var(--coral)" stop-opacity="0"/></linearGradient>
+      </defs>${yt}${xt}
+      <path d="${areaD}" fill="url(#gpos)" clip-path="url(#ca)"/><path d="${areaD}" fill="url(#gneg)" clip-path="url(#cb)"/>
+      <line x1="${padL}" y1="${zeroY}" x2="${W-padR}" y2="${zeroY}" stroke="var(--ink-faint)" stroke-width="1.2"/>
+      ${beMark}<path d="${lineD}" fill="none" stroke="var(--brass-soft)" stroke-width="2.4" stroke-linejoin="round"/>${stepMark}${gopMark}
+    </svg>`;
+}
+
+function renderConfig(){
+  const f=[
+    {k:"keys",label:"Keys (rooms)",hint:"total inventory"},
+    {k:"annualNut",label:"Annual nut €",hint:"unavoidable year-round fixed"},
+    {k:"seasonDaily",label:"Season fixed €/day",hint:"avoidable when closed"},
+    {k:"cpor",label:"CPOR €",hint:"variable / occ. room"},
+    {k:"ancillary",label:"Ancillary €",hint:"F&B + spa contrib / occ. room"}
+  ];
+  document.getElementById("config").innerHTML=f.map(x=>
+    `<div class="field"><label>${x.label}</label><input type="number" data-cfg="${x.k}" value="${config[x.k]}" step="any"><span class="hint">${x.hint}</span></div>`).join("");
+  document.querySelectorAll("[data-cfg]").forEach(el=>el.addEventListener("input",e=>{config[e.target.dataset.cfg]=parseFloat(e.target.value)||0;refresh();}));
+}
+function renderChannels(){
+  const sum=globalMix.reduce((s,v)=>s+(Number(v)||0),0);
+  let html=`<div class="mixwrap"><div class="mh">Channel cost (% of room revenue) &amp; global mix (% of room-nights)</div>`;
+  channels.forEach((c,i)=>{
+    html+=`<div class="mixitem"><label>${c.name}</label>
+      <input type="number" data-chc="${i}" value="${c.cost}" step="any" title="cost %">
+      <input type="number" data-chm="${i}" value="${globalMix[i]}" step="any" title="global mix %"></div>`;
+  });
+  html+=`<div class="mixmeta">global blended <b id="gblend"></b><br>mix sums to <b style="color:${Math.round(sum)===100?'var(--teal-soft)':'var(--coral-soft)'}">${sum}%</b></div></div>`;
+  document.getElementById("channels").innerHTML=html;
+  document.querySelectorAll("[data-chc]").forEach(el=>el.addEventListener("input",e=>{channels[+e.target.dataset.chc].cost=parseFloat(e.target.value)||0;refresh();updateGblend();}));
+  document.querySelectorAll("[data-chm]").forEach(el=>el.addEventListener("input",e=>{globalMix[+e.target.dataset.chm]=parseFloat(e.target.value)||0;refresh();updateGblend();}));
+  updateGblend();
+}
+function updateGblend(){const el=document.getElementById("gblend");if(el)el.textContent=blendedDist(globalMix).toFixed(1)+"%";}
+function renderSteps(){
+  document.getElementById("stepbody").innerHTML=steps.map((s,i)=>{
+    const annual=(Number(s.daily)||0)*activeDays(s);
+    return `<tr><td><input class="txt" data-si="${i}" data-sf="name" value="${s.name}"></td>
+      <td><input type="number" data-si="${i}" data-sf="trig" value="${s.trig}" step="1"></td>
+      <td><input type="number" data-si="${i}" data-sf="daily" value="${s.daily}" step="any"></td>
+      <td style="color:var(--violet)">${fmtK(annual)}</td>
+      <td><button class="row-del" data-delstep="${i}">×</button></td></tr>`;
+  }).join("");
+  document.querySelectorAll("[data-si]").forEach(el=>el.addEventListener("input",e=>{
+    const i=+e.target.dataset.si,f=e.target.dataset.sf;
+    steps[i][f]= f==="name"? e.target.value : (parseFloat(e.target.value)||0);
+    refresh(); if(f!=="name") renderSteps();
+  }));
+  document.querySelectorAll("[data-delstep]").forEach(el=>el.addEventListener("click",e=>{steps.splice(+e.target.dataset.delstep,1);buildTable();renderSteps();refresh();}));
+}
+function activeDays(s){let d=0;periods.forEach(p=>{if(p.open&&(Number(p.occ)||0)>=(Number(s.trig)||0))d+=Number(p.days)||0;});return d;}
+
+function buildTable(){
+  let html="";
+  periods.forEach((p,i)=>{
+    html+=`<tr class="main" data-row="${i}">
+      <td class="name"><input class="txt" data-i="${i}" data-f="name" value="${p.name}"></td>
+      <td><input type="number" data-i="${i}" data-f="days" value="${p.days}" step="1"></td>
+      <td><input type="number" data-i="${i}" data-f="occ" value="${p.occ}" step="any"></td>
+      <td><input type="number" data-i="${i}" data-f="adr" value="${p.adr}" step="any"></td>
+      <td><span class="mixbtn ${p.mix?'ovr':''}" data-mix="${i}">—</span></td>
+      <td data-out="net" data-i="${i}"></td>
+      <td class="steptags" data-out="steps" data-i="${i}"></td>
+      <td data-out="op" data-i="${i}"></td>
+      <td class="bar-cell"><div class="barbg"><div class="barfill" data-out="bar" data-i="${i}"></div></div></td>
+      <td data-out="verdict" data-i="${i}"></td>
+      <td><span class="toggle ${p.open?'on':'off'}" data-tog="${i}">${p.open?'open':'shut'}</span></td>
+      <td><button class="row-del" data-del="${i}">×</button></td></tr>`;
+    if(openDetails.has(i)){
+      const eff=p.mix||globalMix;
+      html+=`<tr class="detail" data-detail="${i}"><td colspan="12"><div class="mixwrap">
+        <div class="mh">${p.name} — channel mix (% of room-nights)${p.mix?' · overriding global':' · using global default'}</div>`;
+      channels.forEach((c,ci)=>{html+=`<div class="mixitem"><label>${c.name} <span style="color:var(--ink-faint)">(${c.cost}%)</span></label><input type="number" data-pm="${i}" data-ch="${ci}" value="${eff[ci]}" step="any"></div>`;});
+      html+=`<div class="mixmeta">blended <b data-pmblend="${i}"></b>${p.mix?` · <span class="lnk" data-resetmix="${i}">reset to global</span>`:''}</div></div></td></tr>`;
+    }
+  });
+  document.getElementById("pbody").innerHTML=html;
+  document.querySelectorAll("#pbody [data-f]").forEach(el=>el.addEventListener("input",e=>{
+    const i=+e.target.dataset.i,f=e.target.dataset.f;
+    periods[i][f]= f==="name"? e.target.value : (parseFloat(e.target.value)||0);
+    refresh();
+  }));
+  document.querySelectorAll("[data-tog]").forEach(el=>el.addEventListener("click",e=>{const i=+e.target.dataset.tog;periods[i].open=!periods[i].open;buildTable();refresh();}));
+  document.querySelectorAll("[data-del]").forEach(el=>el.addEventListener("click",e=>{const i=+e.target.dataset.del;periods.splice(i,1);openDetails=new Set();buildTable();refresh();}));
+  document.querySelectorAll("[data-mix]").forEach(el=>el.addEventListener("click",e=>{const i=+e.target.dataset.mix;openDetails.has(i)?openDetails.delete(i):openDetails.add(i);buildTable();refresh();}));
+  document.querySelectorAll("[data-pm]").forEach(el=>el.addEventListener("input",e=>{
+    const i=+e.target.dataset.pm,ci=+e.target.dataset.ch;
+    if(!periods[i].mix) periods[i].mix=[...globalMix];
+    periods[i].mix[ci]=parseFloat(e.target.value)||0; refresh();
+    const b=document.querySelector(`[data-pmblend="${i}"]`); if(b)b.textContent=blendedDist(periods[i].mix).toFixed(1)+"%";
+    const btn=document.querySelector(`[data-mix="${i}"]`); if(btn)btn.classList.add("ovr");
+  }));
+  document.querySelectorAll("[data-resetmix]").forEach(el=>el.addEventListener("click",e=>{const i=+e.target.dataset.resetmix;periods[i].mix=null;buildTable();refresh();}));
+}
+
+function refresh(){
+  const m=compute();
+  renderKPIs(m); renderChart(m); renderNarrative(m);
+  const vmap={open:["v-open","Stay open"],marg:["v-marg","Marginal"],close:["v-close","Close"],shut:["v-shut","Closed"]};
+  m.rows.forEach((r,i)=>{
+    const netEl=document.querySelector(`[data-out="net"][data-i="${i}"]`);
+    if(netEl) netEl.innerHTML=`${fmtK(r.net+r.anc)} <span style="color:var(--ink-faint);font-size:11px">·${r.dist.toFixed(0)}%</span>`;
+    const opEl=document.querySelector(`[data-out="op"][data-i="${i}"]`);
+    if(opEl){opEl.textContent=fmtK(r.op);opEl.className=r.op>=0?"pos":"neg";}
+    const bar=document.querySelector(`[data-out="bar"][data-i="${i}"]`);
+    if(bar){const c=r.op>0?(r.op/m.maxCarry*100):0;bar.style.width=c+"%";bar.style.background=r.op>=0?"var(--teal)":"var(--coral)";}
+    const vEl=document.querySelector(`[data-out="verdict"][data-i="${i}"]`);
+    if(vEl){const v=vmap[r.verdict];vEl.innerHTML=`<span class="verdict ${v[0]}">${v[1]}</span>`;}
+    const stEl=document.querySelector(`[data-out="steps"][data-i="${i}"]`);
+    if(stEl) stEl.innerHTML=r.activeSteps.map(si=>`<span class="stepchip">${(steps[si]?.name||'').split(' ')[0]}</span>`).join("");
+    const mb=document.querySelector(`[data-mix="${i}"]`);
+    if(mb) mb.textContent=r.dist.toFixed(1)+"% "+(r.p.mix?"◆":"◇");
+  });
+  document.getElementById("pfoot").innerHTML=
+    `<tr><td>Year total</td><td>${m.totDays}</td><td>${(m.occOverall*100).toFixed(0)}%</td><td>${fmt(m.adrBlend)}</td>
+     <td>${m.distBlend.toFixed(1)}%</td><td>${fmtM(m.tNet+m.tAnc)}</td><td></td>
+     <td class="${m.tOp>=0?'pos':'neg'}">${fmtM(m.tOp)}</td><td colspan="4">before nut · GOP ${fmtM(m.gop)}</td></tr>`;
+  updateGblend();
+}
+
+function renderNarrative(m){
+  const be=m.beDay?dayToDate(m.beDay):"no point in the year";
+  const carriers=[...m.rows].filter(r=>r.op>0).sort((a,b)=>b.op-a.op).slice(0,3);
+  const peakShare=m.tOp>0? carriers.reduce((s,r)=>s+r.op,0)/m.tOp*100 :0;
+  const bleeders=m.rows.filter(r=>r.verdict==="marg"||r.verdict==="close").map(r=>r.p.name);
+  const tripped=m.rows.filter(r=>r.activeSteps.length>0);
+  document.getElementById("narrative").innerHTML=
+    `Net of channel cost and step costs, the property clears its annual nut on <b>${be}</b> — everything before is recovery, not profit. `+
+    `The three heaviest carriers — <b>${carriers.map(r=>r.p.name).join(", ")}</b> — throw <b>${peakShare.toFixed(0)}%</b> of total operating contribution at the nut. `+
+    `Step costs add <b>${fmtK(m.tStep)}</b> across ${tripped.length} periods, loaded onto exactly the weeks busy enough to trip them — which is the point: chasing occupancy into a step threshold only pays if the incremental contribution clears the jump. `+
+    (bleeders.length? `Close-or-stay-open flags: <b>${bleeders.join(", ")}</b> fail to cover the avoidable cost of open doors (season + any tripped step). Weigh reactivation and channel-ranking loss before shutting — a period that bleeds a little but holds your direct-booking visibility can still earn its place.`
+      : `Every open period covers the avoidable cost of its doors, so none is a clear closure candidate on this calibration.`);
+}
+
+document.getElementById("reset").addEventListener("click",()=>{load();openDetails=new Set();renderConfig();renderChannels();renderSteps();buildTable();refresh();});
+document.getElementById("addRow").addEventListener("click",()=>{periods.push({name:"New period",days:7,occ:50,adr:400,open:true,mix:null});buildTable();refresh();});
+document.getElementById("addStep").addEventListener("click",()=>{steps.push({name:"New step cost",trig:75,daily:1500});renderSteps();buildTable();refresh();});
+
+renderConfig();renderChannels();renderSteps();buildTable();refresh();
+</script>
+</body>
+</html>
