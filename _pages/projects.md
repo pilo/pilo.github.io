@@ -20,6 +20,14 @@ projects:
     category: "Sourcing Strategy · Total Cost of Ownership"
     description: "Compare suppliers on true landed cost across acquisition, ownership, and end-of-life — proving the cheapest unit price is rarely the cheapest supplier."
     url: "/tools/tco-comparison.html"
+  - title: "Kraljic Matrix"
+    category: "Sourcing Strategy · Category Positioning"
+    description: "Position purchase categories on supply risk vs. profit impact into Strategic, Leverage, Bottleneck, and Non-critical — with the right sourcing strategy for each."
+    url: "/tools/kraljic-matrix.html"
+  - title: "Seasonal Break-Even Map"
+    category: "Revenue Management · Seasonal Break-Even"
+    description: "Track annual hotel break-even as a cumulative recovery line — net of per-channel cost and seasonal step costs — pinpointing the date peak and event weeks clear the year-round fixed nut."
+    url: "/tools/seasonal-breakeven-map.html"  
 ---
 
 F&B procurement and cost-control tools I'm building as I train toward RNCP certification. Each one turns a standard industry framework into something I can run on real numbers — the way a hotel-group buyer or cost controller would.
