@@ -27,7 +27,11 @@ projects:
   - title: "Seasonal Break-Even Map"
     category: "Revenue Management · Seasonal Break-Even"
     description: "Track annual hotel break-even as a cumulative recovery line — net of per-channel cost and seasonal step costs — pinpointing the date peak and event weeks clear the year-round fixed nut."
-    url: "/tools/seasonal-breakeven-map.html"  
+    url: "/tools/seasonal-breakeven-map.html"
+  - title: "F&B P&L & Prime-Cost Dashboard"
+    category: "Operations & Budgeting · F&B P&L"
+    description: "A live departmental P&L — revenue in, cost of sales and labour out, prime cost and GOP computed, with flow-through modelling on incremental revenue."
+    url: "/tools/fb-pnl-dashboard.html"    
 ---
 
 F&B procurement and cost-control tools I'm building as I train toward RNCP certification. Each one turns a standard industry framework into something I can run on real numbers — the way a hotel-group buyer or cost controller would.
