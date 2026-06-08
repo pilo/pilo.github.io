@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kraljic Matrix — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C; --clay:#9a6b55;
+    --strategic:#0F4C45; --leverage:#2E7D5B; --bottleneck:#C8943B; --noncritical:#9a6b55;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),
+                     radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;min-height:100vh;
+    padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;
+  }
+  .wrap{max-width:1160px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:.2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:32px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:64ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+
+  .grid{display:grid;grid-template-columns:1.3fr 1fr;gap:26px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .15s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:18px 22px 22px}
+  .ghost-btn{font-family:inherit;font-size:.74rem;letter-spacing:.04em;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 11px;border-radius:999px;cursor:pointer;transition:.2s}
+  .ghost-btn:hover{border-color:var(--pine);color:var(--pine)}
+
+  /* category rows */
+  .it-head,.it-row{display:grid;grid-template-columns:1.7fr .75fr .75fr .9fr 26px;gap:8px;align-items:center}
+  .it-head{font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);padding:0 2px 8px;font-weight:600}
+  .it-head span{text-align:center}
+  .it-head span:first-child{text-align:left}
+  .it-row{margin-bottom:8px}
+  @media(max-width:560px){
+    .it-head{display:none}
+    .it-row{grid-template-columns:1fr 1fr;gap:7px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+    .it-row .nm{grid-column:1 / -1}
+    .it-row .del{grid-column:2;justify-self:end}
+  }
+  input{font-family:inherit;font-size:.9rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;transition:.15s}
+  input[type=number]{font-family:'Spline Sans Mono',monospace;font-size:.84rem;text-align:right}
+  input:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+  .del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:1.1rem;padding:4px;border-radius:6px;transition:.15s}
+  .del:hover{color:var(--bad);background:rgba(154,107,85,.1)}
+  .row-actions{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+  .add-btn{font-family:inherit;font-size:.86rem;font-weight:600;background:var(--pine);color:#F3EDE3;border:none;padding:9px 16px;border-radius:8px;cursor:pointer;transition:.2s}
+  .add-btn:hover{background:var(--pine-soft)}
+  .scale-note{font-size:.72rem;color:var(--ink-soft);margin-top:12px;line-height:1.45}
+
+  /* quadrant guidance under inputs */
+  .quad-guide{margin-top:18px;border-top:1px solid var(--line);padding-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .qg{padding:11px 12px;border-radius:9px;border:1px solid var(--line);background:var(--paper)}
+  .qg h4{font-size:.82rem;display:flex;align-items:center;gap:7px;margin-bottom:4px}
+  .qg h4::before{content:"";width:9px;height:9px;border-radius:2px;background:var(--c)}
+  .qg p{font-size:.74rem;color:var(--ink-soft);line-height:1.45}
+
+  /* matrix */
+  svg.matrix{display:block;width:100%;height:auto;margin-bottom:14px}
+  .tip{font-size:.8rem;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--brass);border-radius:8px;padding:11px 13px;line-height:1.5;margin-bottom:6px}
+  .tip b{color:var(--ink)}
+
+  /* classification table */
+  .ct{margin-top:16px;border-top:1px solid var(--line)}
+  .ct .crow{display:grid;grid-template-columns:1.4fr auto auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px dashed var(--line)}
+  .ct .crow .nm{font-weight:600;font-size:.92rem}
+  .ct .crow .nm small{display:block;font-weight:400;color:var(--ink-soft);font-size:.74rem}
+  .ct .strat{font-size:.76rem;color:var(--ink-soft);line-height:1.4}
+  .tag{font-size:.66rem;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:999px;white-space:nowrap;justify-self:end}
+  .t-strategic{background:rgba(15,76,69,.13);color:var(--strategic)}
+  .t-leverage{background:rgba(46,125,91,.15);color:var(--leverage)}
+  .t-bottleneck{background:rgba(200,148,59,.18);color:#9a6f1f}
+  .t-noncritical{background:rgba(154,107,85,.16);color:#7d5440}
+  .empty{color:var(--ink-soft);font-size:.9rem;padding:24px 0;text-align:center}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="mark">F&amp;B Procurement Toolkit</span>
+    <a class="back" href="/projects/">← All tools</a>
+  </div>
+
+  <header class="hero">
+    <div class="eyebrow">Sourcing Strategy · Domain — Category Strategy</div>
+    <h1>Kraljic <em>Matrix</em></h1>
+    <p class="lede">Position purchase categories on supply risk versus profit impact to assign the right sourcing strategy to each. The foundational model for strategic sourcing — and the one that tells you which categories deserve a full total-cost-of-ownership analysis and which should simply be automated.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <div class="hd">
+        <h2>Purchase categories</h2>
+        <button class="ghost-btn" id="loadExample">Load example portfolio</button>
+      </div>
+      <div class="bd">
+        <div class="it-head">
+          <span>Category</span><span>Supply risk</span><span>Profit impact</span><span>Annual spend €</span><span></span>
+        </div>
+        <div id="rows"></div>
+        <div class="row-actions"><button class="add-btn" id="addRow">+ Add category</button></div>
+        <p class="scale-note"><strong>Supply risk</strong> (1–10): scarcity, few suppliers, lead-time, switching difficulty. <strong>Profit impact</strong> (1–10): share of spend, effect on cost or guest experience. <strong>Spend</strong> is optional — it sets the bubble size.</p>
+
+        <div class="quad-guide">
+          <div class="qg" style="--c:var(--strategic)"><h4>Strategic</h4><p>High risk · high impact. Long-term partnerships, joint development, dual sourcing, risk mitigation.</p></div>
+          <div class="qg" style="--c:var(--leverage)"><h4>Leverage</h4><p>Low risk · high impact. Use buying power — competitive bidding, volume consolidation, price pressure.</p></div>
+          <div class="qg" style="--c:var(--bottleneck)"><h4>Bottleneck</h4><p>High risk · low impact. Secure supply — buffer stock, alternative sources, contingency plans.</p></div>
+          <div class="qg" style="--c:var(--noncritical)"><h4>Non-critical</h4><p>Low risk · low impact. Simplify &amp; automate — reduce transaction cost, e-catalogues, bundling.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd"><h2>The matrix</h2></div>
+      <div class="bd">
+        <svg class="matrix" id="matrix" viewBox="0 0 360 330" aria-label="Kraljic matrix"></svg>
+        <div class="tip"><b>Pairs with the TCO tool:</b> categories in the <b>Strategic</b> and <b>Leverage</b> quadrants — high profit impact — are where a full total-cost-of-ownership analysis pays off most. Non-critical items just need automating.</div>
+        <div class="ct" id="classTable"></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · Strategic sourcing &amp; category positioning</span>
+    <span>Axes: supply risk (x) × profit impact (y) · threshold at scale midpoint · Kraljic 1983</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const rowsEl=document.getElementById('rows');
+  const TH=5.5; // midpoint of 1–10 scale
+  let data=[];
+
+  const CAT = {
+    strategic:  {label:'STRATEGIC',   color:'#0F4C45', tag:'t-strategic',   strat:'Partner &amp; dual-source. Long-term agreement, joint development, risk mitigation.'},
+    leverage:   {label:'LEVERAGE',    color:'#2E7D5B', tag:'t-leverage',    strat:'Use buying power. Competitive tender, consolidate volume, push on price.'},
+    bottleneck: {label:'BOTTLENECK',  color:'#C8943B', tag:'t-bottleneck',  strat:'Secure supply. Buffer stock, qualify alternatives, contingency planning.'},
+    noncritical:{label:'NON-CRITICAL',color:'#9a6b55', tag:'t-noncritical', strat:'Simplify &amp; automate. e-catalogue, bundle orders, cut transaction cost.'}
+  };
+
+  function classOf(risk, impact){
+    const hr=risk>TH, hi=impact>TH;
+    return hi ? (hr?'strategic':'leverage') : (hr?'bottleneck':'noncritical');
+  }
+
+  function rowTemplate(r,i){
+    const div=document.createElement('div');
+    div.className='it-row';
+    div.innerHTML=`
+      <input class="nm" type="text" placeholder="e.g. Commodity proteins" value="${escapeAttr(r.name||'')}" data-i="${i}" data-f="name">
+      <input type="number" min="1" max="10" step="any" placeholder="1–10" value="${r.risk??''}" data-i="${i}" data-f="risk">
+      <input type="number" min="1" max="10" step="any" placeholder="1–10" value="${r.impact??''}" data-i="${i}" data-f="impact">
+      <input type="number" min="0" step="any" placeholder="0" value="${r.spend??''}" data-i="${i}" data-f="spend">
+      <button class="del" data-del="${i}" title="Remove">×</button>`;
+    return div;
+  }
+  function render(){rowsEl.innerHTML='';data.forEach((r,i)=>rowsEl.appendChild(rowTemplate(r,i)));compute();}
+
+  function items(){
+    return data.map(r=>({
+      name:(r.name||'').trim(),
+      risk:parseFloat(r.risk)||0,
+      impact:parseFloat(r.impact)||0,
+      spend:parseFloat(r.spend)||0
+    })).filter(x=>x.risk>0 && x.impact>0)
+      .map(x=>({...x, cat:classOf(x.risk,x.impact)}));
+  }
+
+  function compute(){
+    const its=items();
+    drawMatrix(its);
+    drawTable(its);
+  }
+
+  function drawMatrix(its){
+    const svg=document.getElementById('matrix');
+    const L=44,Rp=16,T=26,B=42, W=360,H=330;
+    const x0=L,x1=W-Rp,y0=H-B,y1=T, pw=x1-x0, ph=y0-y1;
+    const sx=v=>x0+((v-1)/9)*pw;       // 1..10
+    const sy=v=>y0-((v-1)/9)*ph;
+    const qx=sx(TH), qy=sy(TH);
+    let g='';
+    // quadrant tints  (TL leverage, TR strategic, BL noncritical, BR bottleneck)
+    g+=`<rect x="${x0}" y="${y1}" width="${qx-x0}" height="${qy-y1}" fill="rgba(46,125,91,.06)"/>`;
+    g+=`<rect x="${qx}" y="${y1}" width="${x1-qx}" height="${qy-y1}" fill="rgba(15,76,69,.07)"/>`;
+    g+=`<rect x="${x0}" y="${qy}" width="${qx-x0}" height="${y0-qy}" fill="rgba(154,107,85,.05)"/>`;
+    g+=`<rect x="${qx}" y="${qy}" width="${x1-qx}" height="${y0-qy}" fill="rgba(200,148,59,.06)"/>`;
+    // quadrant labels
+    g+=`<text x="${(x0+qx)/2}" y="${y1+14}" font-size="9.5" fill="#2E7D5B" text-anchor="middle" font-weight="700" font-family="Hanken Grotesk">LEVERAGE</text>`;
+    g+=`<text x="${(qx+x1)/2}" y="${y1+14}" font-size="9.5" fill="#0F4C45" text-anchor="middle" font-weight="700" font-family="Hanken Grotesk">STRATEGIC</text>`;
+    g+=`<text x="${(x0+qx)/2}" y="${y0-7}" font-size="9.5" fill="#7d5440" text-anchor="middle" font-weight="700" font-family="Hanken Grotesk">NON-CRITICAL</text>`;
+    g+=`<text x="${(qx+x1)/2}" y="${y0-7}" font-size="9.5" fill="#9a6f1f" text-anchor="middle" font-weight="700" font-family="Hanken Grotesk">BOTTLENECK</text>`;
+    // crosshair
+    g+=`<line x1="${qx}" y1="${y1}" x2="${qx}" y2="${y0}" stroke="rgba(27,26,22,.28)" stroke-width="1" stroke-dasharray="4 3"/>`;
+    g+=`<line x1="${x0}" y1="${qy}" x2="${x1}" y2="${qy}" stroke="rgba(27,26,22,.28)" stroke-width="1" stroke-dasharray="4 3"/>`;
+    // axes
+    g+=`<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y0}" stroke="rgba(27,26,22,.4)" stroke-width="1"/>`;
+    g+=`<line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y1}" stroke="rgba(27,26,22,.4)" stroke-width="1"/>`;
+    g+=`<text x="${(x0+x1)/2}" y="${H-6}" font-size="9" fill="#5C574B" text-anchor="middle" font-family="Hanken Grotesk">Supply risk →</text>`;
+    g+=`<text transform="translate(12,${(y0+y1)/2}) rotate(-90)" font-size="9" fill="#5C574B" text-anchor="middle" font-family="Hanken Grotesk">Profit impact →</text>`;
+    // bubbles
+    const maxSpend=Math.max(0,...its.map(i=>i.spend));
+    its.forEach(it=>{
+      const cx=sx(it.risk), cy=sy(it.impact), c=CAT[it.cat].color;
+      let r=6;
+      if(maxSpend>0 && it.spend>0) r=6+Math.sqrt(it.spend/maxSpend)*11;
+      g+=`<circle cx="${cx}" cy="${cy}" r="${r.toFixed(1)}" fill="${c}" fill-opacity=".8" stroke="#FBF7F0" stroke-width="1.5"/>`;
+      g+=`<text x="${cx}" y="${cy-r-3}" font-size="8" fill="#1B1A16" text-anchor="middle" font-family="Hanken Grotesk">${escapeXml((it.name||'?').slice(0,16))}</text>`;
+    });
+    if(its.length===0){
+      g+=`<text x="${W/2}" y="${H/2}" font-size="11" fill="#5C574B" text-anchor="middle" font-family="Hanken Grotesk">Add categories with risk &amp; impact scores</text>`;
+    }
+    svg.innerHTML=g;
+  }
+
+  function drawTable(its){
+    const el=document.getElementById('classTable');
+    if(its.length===0){el.innerHTML='<div class="empty">No categories positioned yet.</div>';return;}
+    const order={strategic:0,leverage:1,bottleneck:2,noncritical:3};
+    const sorted=[...its].sort((a,b)=>order[a.cat]-order[b.cat] || b.spend-a.spend);
+    el.innerHTML=sorted.map(it=>{
+      const m=CAT[it.cat];
+      const spendTxt = it.spend>0 ? ' · €'+Math.round(it.spend).toLocaleString('en-IE')+'/yr' : '';
+      return `<div class="crow">
+        <div class="nm">${escapeHtml(it.name||'Untitled')}<small>risk ${it.risk} · impact ${it.impact}${spendTxt}</small></div>
+        <div class="strat">${m.strat}</div>
+        <span class="tag ${m.tag}">${m.label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function escapeXml(s){return String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
+  function escapeHtml(s){return escapeXml(s);}
+  function escapeAttr(s){return escapeHtml(s).replace(/"/g,'&quot;');}
+
+  rowsEl.addEventListener('input',e=>{
+    const i=e.target.dataset.i,f=e.target.dataset.f;
+    if(i!==undefined){data[i][f]=e.target.value;compute();}
+  });
+  rowsEl.addEventListener('click',e=>{
+    if(e.target.dataset.del!==undefined){data.splice(+e.target.dataset.del,1);render();}
+  });
+  document.getElementById('addRow').addEventListener('click',()=>{
+    data.push({name:'',risk:'',impact:'',spend:''});render();
+    rowsEl.lastChild.querySelector('input').focus();
+  });
+  document.getElementById('loadExample').addEventListener('click',()=>{
+    data=[
+      {name:'Premium branded spirits', risk:8, impact:8, spend:62000},
+      {name:'PDO/DOP ingredients',     risk:7, impact:7, spend:38000},
+      {name:'Commodity proteins',      risk:3, impact:9, spend:140000},
+      {name:'Bulk cooking oil',        risk:2, impact:6, spend:24000},
+      {name:'Single-origin cheese',    risk:8, impact:3, spend:12000},
+      {name:'Specialty seafood',       risk:7, impact:4, spend:18000},
+      {name:'Cleaning supplies',       risk:2, impact:2, spend:6000},
+      {name:'Generic packaging',       risk:3, impact:2, spend:9000}
+    ];
+    render();
+  });
+
+  data=[{name:'',risk:'',impact:'',spend:''},{name:'',risk:'',impact:'',spend:''}];
+  render();
+})();
+</script>
+</body>
+</html>
