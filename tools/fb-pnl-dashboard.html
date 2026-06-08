@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F&B P&L / Prime-Cost Dashboard — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C; --clay:#9a6b55;
+    --good:#2E7D5B; --warn:#C8943B; --bad:#A23B2E;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),
+                     radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;min-height:100vh;
+    padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:.2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:28px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:66ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+  .hero-actions{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+  .ghost-btn{font-family:inherit;font-size:.76rem;letter-spacing:.04em;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:7px 13px;border-radius:999px;cursor:pointer;transition:.2s}
+  .ghost-btn:hover{border-color:var(--pine);color:var(--pine)}
+
+  /* KPI strip */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:16px 18px;opacity:0;animation:rise .6s forwards}
+  .kpi:nth-child(1){animation-delay:.1s}.kpi:nth-child(2){animation-delay:.16s}.kpi:nth-child(3){animation-delay:.22s}.kpi:nth-child(4){animation-delay:.28s}
+  .kpi .k{font-size:.64rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .kpi .v{font-family:'Spline Sans Mono',monospace;font-size:1.75rem;font-weight:500;margin-top:5px;letter-spacing:-.01em;color:var(--pine)}
+  .kpi .s{font-size:.72rem;color:var(--ink-soft);margin-top:2px}
+
+  /* revenue euro bar */
+  .euro{background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:16px 18px;margin-bottom:22px;opacity:0;animation:rise .6s .34s forwards}
+  .euro .lab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
+  .euro .lab h3{font-family:'Fraunces',serif;font-weight:500;font-size:1.05rem}
+  .euro .lab span{font-size:.74rem;color:var(--ink-soft)}
+  .ebar{display:flex;height:30px;border-radius:7px;overflow:hidden;border:1px solid var(--line);background:var(--paper)}
+  .eseg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700;color:#F3EDE3;transition:width .45s ease;overflow:hidden;white-space:nowrap}
+  .eseg.cogs{background:var(--pine)} .eseg.labour{background:var(--brass)} .eseg.opex{background:var(--clay)} .eseg.gop{background:var(--good)} .eseg.loss{background:var(--bad)}
+  .elegend{display:flex;gap:16px;flex-wrap:wrap;font-size:.74rem;color:var(--ink-soft);margin-top:10px}
+  .elegend span{display:inline-flex;align-items:center;gap:6px}
+  .elegend i{width:10px;height:10px;border-radius:2px}
+
+  .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:start}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .2s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:14px 22px 22px}
+
+  /* statement */
+  .stmt-head{display:grid;grid-template-columns:1fr 128px 64px;gap:10px;font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;padding:8px 0 4px}
+  .stmt-head span:nth-child(2){text-align:right}.stmt-head span:nth-child(3){text-align:right}
+  .grp{font-family:'Fraunces',serif;font-style:italic;font-size:1rem;margin:14px 0 4px;color:var(--ink)}
+  .ln{display:grid;grid-template-columns:1fr 128px 64px;gap:10px;align-items:center;padding:3px 0}
+  .ln label{font-size:.88rem;color:var(--ink-soft)}
+  .ln .pct{font-family:'Spline Sans Mono',monospace;font-size:.78rem;color:var(--ink-soft);text-align:right}
+  .amt{position:relative}
+  .amt::before{content:"€";position:absolute;left:9px;top:50%;transform:translateY(-50%);font-family:'Spline Sans Mono',monospace;font-size:.8rem;color:var(--ink-soft);pointer-events:none}
+  .amt input{font-family:'Spline Sans Mono',monospace;font-size:.84rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px 9px 8px 20px;width:100%;text-align:right;transition:.15s}
+  .amt input:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+  .sub{display:grid;grid-template-columns:1fr 128px 64px;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line);margin-top:5px;font-weight:600}
+  .sub .a{font-family:'Spline Sans Mono',monospace;text-align:right;font-size:.92rem}
+  .sub .p{font-family:'Spline Sans Mono',monospace;text-align:right;font-size:.78rem;color:var(--ink-soft)}
+  .hl{background:rgba(15,76,69,.07);margin:10px -14px 0;padding:11px 14px;border-radius:9px;border:none}
+  .hl.gop{background:rgba(46,125,91,.1)}
+  .hl .l{font-family:'Fraunces',serif;font-size:1.05rem}
+  .hl .a{color:var(--pine);font-size:1.05rem}
+  .hl.gop .a{color:var(--good)}
+
+  /* sidebar panels */
+  .side .card + .card{margin-top:22px}
+  .bm{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px dashed var(--line);gap:10px}
+  .bm:last-child{border-bottom:none}
+  .bm .n{font-size:.86rem}
+  .bm .n small{display:block;color:var(--ink-soft);font-size:.7rem}
+  .bm .r{text-align:right;white-space:nowrap}
+  .bm .r .val{font-family:'Spline Sans Mono',monospace;font-weight:600;font-size:.95rem}
+  .badge{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:3px}
+  .b-good{background:rgba(46,125,91,.14);color:var(--good)}
+  .b-warn{background:rgba(200,148,59,.18);color:#9a6f1f}
+  .b-bad{background:rgba(162,59,46,.14);color:var(--bad)}
+
+  /* flow-through */
+  .ft-controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:8px}
+  .ft-field label{display:block;font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:4px}
+  .ft-field input{font-family:'Spline Sans Mono',monospace;font-size:.84rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px 9px;width:100%;text-align:right}
+  .ft-field input:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+  .presets{display:flex;gap:7px;margin:12px 0}
+  .presets button{flex:1;font-family:inherit;font-size:.76rem;font-weight:600;background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);padding:7px;border-radius:7px;cursor:pointer;transition:.15s}
+  .presets button:hover{border-color:var(--pine);color:var(--pine)}
+  .ft-out{margin-top:6px}
+  .ft-row{display:flex;justify-content:space-between;font-size:.84rem;padding:6px 0;color:var(--ink-soft)}
+  .ft-row .v{font-family:'Spline Sans Mono',monospace}
+  .ft-row.key{border-top:1px dashed var(--line);margin-top:5px;padding-top:9px;color:var(--ink);font-weight:600}
+  .ft-row.key .v{color:var(--good)}
+  .ft-big{text-align:center;padding:12px 0 6px}
+  .ft-big .v{font-family:'Spline Sans Mono',monospace;font-size:2.1rem;font-weight:500;color:var(--pine)}
+  .ft-big .k{font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .note{font-size:.78rem;color:var(--ink-soft);line-height:1.5;margin-top:12px;padding:11px 13px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--brass);border-radius:8px}
+  .note b{color:var(--ink)}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="mark">F&amp;B Procurement Toolkit</span>
+    <a class="back" href="/projects/">← All tools</a>
+  </div>
+
+  <header class="hero">
+    <div class="eyebrow">Operations &amp; Budgeting · Domain — F&B P&L</div>
+    <h1>F&amp;B P&amp;L &amp; <em>Prime-Cost</em> Dashboard</h1>
+    <p class="lede">Build a departmental P&amp;L the way a hotel F&amp;B manager runs it: revenue in, cost of sales and labour out, prime cost and gross operating profit computed live — then model how incremental revenue flows through to profit once you separate variable from fixed cost. Prime cost and flow-through are the two numbers that separate an operator from a bookkeeper.</p>
+    <div class="hero-actions">
+      <button class="ghost-btn" id="loadExample">Load example: hotel F&amp;B month</button>
+      <button class="ghost-btn" id="clearAll">Clear</button>
+    </div>
+  </header>
+
+  <!-- KPI strip -->
+  <div class="kpis">
+    <div class="kpi"><div class="k">Total revenue</div><div class="v" id="kpi_rev">€0</div><div class="s">food + beverage + other</div></div>
+    <div class="kpi"><div class="k">Prime cost %</div><div class="v" id="kpi_prime">—</div><div class="s" id="kpi_prime_s">COGS + labour ÷ revenue</div></div>
+    <div class="kpi"><div class="k">Gross operating profit</div><div class="v" id="kpi_gop">€0</div><div class="s">before rent &amp; fixed charges</div></div>
+    <div class="kpi"><div class="k">GOP margin %</div><div class="v" id="kpi_gop_p">—</div><div class="s">GOP ÷ revenue</div></div>
+  </div>
+
+  <!-- revenue euro -->
+  <div class="euro">
+    <div class="lab"><h3>Where the revenue euro goes</h3><span>each segment = % of total revenue</span></div>
+    <div class="ebar" id="ebar"></div>
+    <div class="elegend">
+      <span><i style="background:var(--pine)"></i>Cost of sales</span>
+      <span><i style="background:var(--brass)"></i>Labour</span>
+      <span><i style="background:var(--clay)"></i>Other opex</span>
+      <span><i style="background:var(--good)"></i>GOP</span>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- statement -->
+    <section class="card">
+      <div class="hd"><h2>The P&amp;L</h2><span style="font-size:.74rem;color:var(--ink-soft)">% column = common-size, of total revenue</span></div>
+      <div class="bd">
+        <div class="stmt-head"><span>Line</span><span>Amount</span><span>% rev</span></div>
+
+        <div class="grp">Revenue</div>
+        <div class="ln"><label>Food revenue</label><div class="amt"><input type="number" id="rev_food" min="0" step="any" placeholder="0"></div><span class="pct" id="rev_food_p">—</span></div>
+        <div class="ln"><label>Beverage revenue</label><div class="amt"><input type="number" id="rev_bev" min="0" step="any" placeholder="0"></div><span class="pct" id="rev_bev_p">—</span></div>
+        <div class="ln"><label>Other revenue (events, etc.)</label><div class="amt"><input type="number" id="rev_other" min="0" step="any" placeholder="0"></div><span class="pct" id="rev_other_p">—</span></div>
+        <div class="sub"><span>Total revenue</span><span class="a" id="t_rev">€0</span><span class="p">100%</span></div>
+
+        <div class="grp">Cost of sales</div>
+        <div class="ln"><label>Food cost</label><div class="amt"><input type="number" id="cost_food" min="0" step="any" placeholder="0"></div><span class="pct" id="cost_food_p">—</span></div>
+        <div class="ln"><label>Beverage cost</label><div class="amt"><input type="number" id="cost_bev" min="0" step="any" placeholder="0"></div><span class="pct" id="cost_bev_p">—</span></div>
+        <div class="sub"><span>Total cost of sales</span><span class="a" id="t_cogs">€0</span><span class="p" id="t_cogs_p">—</span></div>
+        <div class="sub" style="border-top:none;font-weight:500;color:var(--ink-soft)"><span>Gross profit</span><span class="a" id="gross">€0</span><span class="p" id="gross_p">—</span></div>
+
+        <div class="grp">Labour</div>
+        <div class="ln"><label>Management / salaried</label><div class="amt"><input type="number" id="lab_mgmt" min="0" step="any" placeholder="0"></div><span class="pct" id="lab_mgmt_p">—</span></div>
+        <div class="ln"><label>Hourly wages</label><div class="amt"><input type="number" id="lab_hourly" min="0" step="any" placeholder="0"></div><span class="pct" id="lab_hourly_p">—</span></div>
+        <div class="ln"><label>Benefits &amp; payroll taxes</label><div class="amt"><input type="number" id="lab_benefits" min="0" step="any" placeholder="0"></div><span class="pct" id="lab_benefits_p">—</span></div>
+        <div class="sub"><span>Total labour</span><span class="a" id="t_labour">€0</span><span class="p" id="t_labour_p">—</span></div>
+
+        <div class="sub hl"><span class="l">Prime cost</span><span class="a" id="prime_cost">€0</span><span class="p" id="prime_cost_p">—</span></div>
+
+        <div class="grp">Other operating expenses</div>
+        <div class="ln"><label>Direct operating (supplies, smallwares)</label><div class="amt"><input type="number" id="ox_direct" min="0" step="any" placeholder="0"></div><span class="pct" id="ox_direct_p">—</span></div>
+        <div class="ln"><label>Utilities</label><div class="amt"><input type="number" id="ox_utils" min="0" step="any" placeholder="0"></div><span class="pct" id="ox_utils_p">—</span></div>
+        <div class="ln"><label>Marketing</label><div class="amt"><input type="number" id="ox_mktg" min="0" step="any" placeholder="0"></div><span class="pct" id="ox_mktg_p">—</span></div>
+        <div class="ln"><label>Repairs &amp; maintenance</label><div class="amt"><input type="number" id="ox_rm" min="0" step="any" placeholder="0"></div><span class="pct" id="ox_rm_p">—</span></div>
+        <div class="ln"><label>Admin &amp; general</label><div class="amt"><input type="number" id="ox_admin" min="0" step="any" placeholder="0"></div><span class="pct" id="ox_admin_p">—</span></div>
+        <div class="sub"><span>Total other opex</span><span class="a" id="t_opex">€0</span><span class="p" id="t_opex_p">—</span></div>
+
+        <div class="sub hl gop"><span class="l">Gross operating profit (GOP)</span><span class="a" id="gop">€0</span><span class="p" id="gop_p">—</span></div>
+      </div>
+    </section>
+
+    <!-- sidebar -->
+    <div class="side">
+      <section class="card">
+        <div class="hd"><h2>Benchmarks</h2></div>
+        <div class="bd">
+          <div class="bm"><div class="n">Food cost %<small>÷ food revenue · target 28–35%</small></div><div class="r"><div class="val" id="bm_food">—</div><span class="badge" id="bm_food_b"></span></div></div>
+          <div class="bm"><div class="n">Beverage cost %<small>÷ beverage revenue · target 18–24%</small></div><div class="r"><div class="val" id="bm_bev">—</div><span class="badge" id="bm_bev_b"></span></div></div>
+          <div class="bm"><div class="n">Labour %<small>÷ total revenue · target 25–35%</small></div><div class="r"><div class="val" id="bm_lab">—</div><span class="badge" id="bm_lab_b"></span></div></div>
+          <div class="bm"><div class="n">Prime cost %<small>÷ total revenue · target ≤ 65%</small></div><div class="r"><div class="val" id="bm_prime">—</div><span class="badge" id="bm_prime_b"></span></div></div>
+          <div class="bm"><div class="n">GOP margin %<small>÷ total revenue · ≥ 25% healthy</small></div><div class="r"><div class="val" id="bm_gop">—</div><span class="badge" id="bm_gop_b"></span></div></div>
+          <div class="note" style="border-left-color:var(--ink-soft)">Bands are indicative for full-service hotel F&amp;B and vary by concept, market and service model.</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="hd"><h2>Flow-through</h2></div>
+        <div class="bd">
+          <p style="font-size:.82rem;color:var(--ink-soft);margin-bottom:12px">How much of an extra euro of revenue reaches GOP — once costs are split into variable (scale with sales) and fixed.</p>
+          <div class="ft-controls">
+            <div class="ft-field"><label>Labour variable %</label><input type="number" id="lab_var" min="0" max="100" step="1" value="55"></div>
+            <div class="ft-field"><label>Opex variable %</label><input type="number" id="opex_var" min="0" max="100" step="1" value="30"></div>
+          </div>
+          <div class="ft-field"><label>Incremental revenue (€)</label><div class="amt"><input type="number" id="ft_inc" min="0" step="any" placeholder="0" style="padding-left:20px"></div></div>
+          <div class="presets">
+            <button data-up="5">+5%</button><button data-up="10">+10%</button><button data-up="15">+15%</button>
+          </div>
+          <div class="ft-big"><div class="v" id="ft_flow">—</div><div class="k">Flow-through rate</div></div>
+          <div class="ft-out">
+            <div class="ft-row"><span>Variable cost ratio</span><span class="v" id="ft_varratio">—</span></div>
+            <div class="ft-row"><span>Variable cost on increment</span><span class="v" id="ft_varcost">—</span></div>
+            <div class="ft-row key"><span>Incremental GOP</span><span class="v" id="ft_incgop">—</span></div>
+            <div class="ft-row"><span>New GOP</span><span class="v" id="ft_newgop">—</span></div>
+            <div class="ft-row"><span>New GOP margin</span><span class="v" id="ft_newgop_p">—</span></div>
+          </div>
+          <div class="note"><b>Why it matters:</b> a 10% revenue rise rarely means 10% more profit — it lands at the flow-through rate, because fixed costs don't move. This is the argument an F&amp;B manager makes to justify a promotion or covers push.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · F&amp;B P&amp;L, prime cost &amp; profit flow-through</span>
+    <span>Prime cost = COGS + labour · GOP = revenue − COGS − labour − opex · flow-through = 1 − variable cost ratio</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const REV=['rev_food','rev_bev','rev_other'];
+  const COGS=['cost_food','cost_bev'];
+  const LAB=['lab_mgmt','lab_hourly','lab_benefits'];
+  const OPEX=['ox_direct','ox_utils','ox_mktg','ox_rm','ox_admin'];
+  const ALL=[...REV,...COGS,...LAB,...OPEX];
+
+  const v = id => parseFloat(document.getElementById(id).value)||0;
+  const sum = arr => arr.reduce((s,id)=>s+v(id),0);
+  const fmt0 = n => '€'+Math.round(isFinite(n)?n:0).toLocaleString('en-IE');
+  const pct = (n,d) => d>0 ? (n/d*100).toFixed(1)+'%' : '—';
+  const setText=(id,t)=>document.getElementById(id).textContent=t;
+
+  function costBadge(val, hi, big){ // lower better; big = warn margin above hi
+    if(val===null) return ['',''];
+    if(val<=hi) return ['b-good','within target'];
+    if(val<=hi+big) return ['b-warn','slightly high'];
+    return ['b-bad','above target'];
+  }
+  function gopBadge(val){
+    if(val===null) return ['',''];
+    if(val>=25) return ['b-good','healthy'];
+    if(val>=15) return ['b-warn','thin'];
+    if(val>=0)  return ['b-bad','very thin'];
+    return ['b-bad','loss'];
+  }
+
+  function compute(){
+    const tRev=sum(REV), tCogs=sum(COGS), tLab=sum(LAB), tOpex=sum(OPEX);
+    const gross=tRev-tCogs;
+    const prime=tCogs+tLab;
+    const gop=tRev-tCogs-tLab-tOpex;
+
+    // line %s
+    ALL.forEach(id=> setText(id+'_p', tRev>0 ? pct(v(id),tRev) : '—'));
+    setText('t_cogs', fmt0(tCogs)); setText('t_cogs_p', pct(tCogs,tRev));
+    setText('gross', fmt0(gross)); setText('gross_p', pct(gross,tRev));
+    setText('t_rev', fmt0(tRev));
+    setText('t_labour', fmt0(tLab)); setText('t_labour_p', pct(tLab,tRev));
+    setText('prime_cost', fmt0(prime)); setText('prime_cost_p', pct(prime,tRev));
+    setText('t_opex', fmt0(tOpex)); setText('t_opex_p', pct(tOpex,tRev));
+    setText('gop', fmt0(gop)); setText('gop_p', pct(gop,tRev));
+
+    // KPIs
+    setText('kpi_rev', fmt0(tRev));
+    setText('kpi_prime', tRev>0 ? pct(prime,tRev) : '—');
+    setText('kpi_gop', fmt0(gop));
+    setText('kpi_gop_p', tRev>0 ? pct(gop,tRev) : '—');
+
+    // euro bar
+    const ebar=document.getElementById('ebar');
+    if(tRev>0){
+      const seg=(cls,amt,label)=>{
+        const p=Math.max(0,amt/tRev*100);
+        return p>0 ? `<div class="eseg ${cls}" style="width:${p}%" title="${label} ${fmt0(amt)} (${p.toFixed(1)}%)">${p>9?label:''}</div>` : '';
+      };
+      let bar = seg('cogs',tCogs,'COGS')+seg('labour',tLab,'Labour')+seg('opex',tOpex,'Opex');
+      bar += gop>=0 ? seg('gop',gop,'GOP') : `<div class="eseg loss" style="width:100%" title="Operating loss">OPERATING LOSS</div>`;
+      ebar.innerHTML=bar;
+    } else ebar.innerHTML='';
+
+    // benchmarks
+    const foodRev=v('rev_food'), bevRev=v('rev_bev');
+    const foodPct = foodRev>0 ? v('cost_food')/foodRev*100 : null;
+    const bevPct  = bevRev>0 ? v('cost_bev')/bevRev*100 : null;
+    const labPct  = tRev>0 ? tLab/tRev*100 : null;
+    const primePct= tRev>0 ? prime/tRev*100 : null;
+    const gopPct  = tRev>0 ? gop/tRev*100 : null;
+    bench('bm_food', foodPct, costBadge(foodPct,35,5));
+    bench('bm_bev',  bevPct,  costBadge(bevPct,24,4));
+    bench('bm_lab',  labPct,  costBadge(labPct,35,5));
+    bench('bm_prime',primePct,costBadge(primePct,65,5));
+    bench('bm_gop',  gopPct,  gopBadge(gopPct));
+
+    // flow-through
+    const labVar=Math.min(100,Math.max(0,v('lab_var')))/100;
+    const opexVar=Math.min(100,Math.max(0,v('opex_var')))/100;
+    const varCost = tCogs*1 + tLab*labVar + tOpex*opexVar;
+    const varRatio = tRev>0 ? varCost/tRev : 0;
+    const flow = 1-varRatio;
+    setText('ft_varratio', tRev>0 ? (varRatio*100).toFixed(1)+'%' : '—');
+    setText('ft_flow', tRev>0 ? (flow*100).toFixed(1)+'%' : '—');
+    const inc=v('ft_inc');
+    const incVar=inc*varRatio, incGop=inc*flow;
+    setText('ft_varcost', fmt0(incVar));
+    setText('ft_incgop', fmt0(incGop));
+    setText('ft_newgop', fmt0(gop+incGop));
+    setText('ft_newgop_p', (tRev+inc)>0 ? pct(gop+incGop, tRev+inc) : '—');
+  }
+
+  function bench(id, val, badge){
+    setText(id, val===null ? '—' : val.toFixed(1)+'%');
+    const b=document.getElementById(id+'_b');
+    b.className='badge '+(badge[0]||'');
+    b.textContent=badge[1]||'';
+  }
+
+  ALL.concat(['lab_var','opex_var','ft_inc']).forEach(id=>{
+    document.getElementById(id).addEventListener('input', compute);
+  });
+  document.querySelectorAll('.presets button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const tRev=sum(REV);
+      document.getElementById('ft_inc').value = Math.round(tRev*(+btn.dataset.up)/100);
+      compute();
+    });
+  });
+
+  const EXAMPLE={
+    rev_food:180000, rev_bev:70000, rev_other:10000,
+    cost_food:54000, cost_bev:14000,
+    lab_mgmt:26000, lab_hourly:52000, lab_benefits:14000,
+    ox_direct:12000, ox_utils:8000, ox_mktg:6000, ox_rm:4000, ox_admin:7000
+  };
+  document.getElementById('loadExample').addEventListener('click', ()=>{
+    Object.entries(EXAMPLE).forEach(([k,val])=>document.getElementById(k).value=val);
+    document.getElementById('lab_var').value=55;
+    document.getElementById('opex_var').value=30;
+    document.getElementById('ft_inc').value=26000;
+    compute();
+  });
+  document.getElementById('clearAll').addEventListener('click', ()=>{
+    ALL.concat(['ft_inc']).forEach(id=>document.getElementById(id).value='');
+    compute();
+  });
+
+  compute();
+})();
+</script>
+</body>
+</html>
