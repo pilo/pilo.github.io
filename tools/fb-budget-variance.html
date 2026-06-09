@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F&B Budget & Variance Model — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C; --clay:#9a6b55;
+    --good:#2E7D5B; --bad:#A23B2E;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;min-height:100vh;padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;}
+  .wrap{max-width:1160px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:.2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:28px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:66ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px}
+  @media(max-width:680px){.kpis{grid-template-columns:1fr}}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:15px 17px;opacity:0;animation:rise .6s forwards}
+  .kpi:nth-child(1){animation-delay:.1s}.kpi:nth-child(2){animation-delay:.16s}.kpi:nth-child(3){animation-delay:.22s}
+  .kpi .k{font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .kpi .v{font-family:'Spline Sans Mono',monospace;font-size:1.55rem;font-weight:500;margin-top:5px;color:var(--pine)}
+  .kpi .v.pos{color:var(--good)} .kpi .v.neg{color:var(--bad)}
+  .kpi .s{font-size:.71rem;color:var(--ink-soft);margin-top:2px}
+  .grid{display:grid;grid-template-columns:1fr 1.4fr;gap:24px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .2s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:16px 22px 22px}
+  .ghost-btn{font-family:inherit;font-size:.74rem;letter-spacing:.04em;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 11px;border-radius:999px;cursor:pointer;transition:.2s}
+  .ghost-btn:hover{border-color:var(--pine);color:var(--pine)}
+  .ivhead{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;padding:6px 0 8px}
+  .ivhead span:not(:first-child){text-align:right}
+  .iv{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:10px;align-items:center;padding:6px 0}
+  .iv label{font-size:.86rem;color:var(--ink-soft)}
+  .iv label small{display:block;font-size:.68rem;color:var(--ink-soft);opacity:.8}
+  .amt{position:relative}
+  .amt::before{content:"€";position:absolute;left:9px;top:50%;transform:translateY(-50%);font-family:'Spline Sans Mono',monospace;font-size:.8rem;color:var(--ink-soft);pointer-events:none}
+  input[type=number]{font-family:'Spline Sans Mono',monospace;font-size:.84rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px 9px;width:100%;text-align:right;transition:.15s}
+  .amt input{padding-left:20px}
+  input:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+  .grp{font-family:'Fraunces',serif;font-style:italic;font-size:.98rem;margin:14px 0 2px;color:var(--ink)}
+  svg.wf{display:block;width:100%;height:auto;margin-bottom:6px}
+  .axis{font-size:9px;fill:var(--ink-soft);font-family:'Hanken Grotesk',sans-serif}
+  .bridge{margin-top:14px;border-top:1px solid var(--line)}
+  .br{display:grid;grid-template-columns:1.4fr auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.86rem}
+  .br .lab b{font-weight:600}
+  .br .lab small{display:block;color:var(--ink-soft);font-size:.72rem}
+  .br .val{font-family:'Spline Sans Mono',monospace;text-align:right;font-weight:600}
+  .br .fu{font-size:.62rem;font-weight:700;letter-spacing:.04em;padding:2px 8px;border-radius:999px;justify-self:end;white-space:nowrap}
+  .fu-f{background:rgba(46,125,91,.14);color:var(--good)} .fu-u{background:rgba(162,59,46,.14);color:var(--bad)}
+  .br.anchor{font-weight:600}.br.anchor .lab{font-family:'Fraunces',serif;font-style:italic}
+  .narrative{font-size:.88rem;line-height:1.6;color:var(--ink-soft);margin-top:14px}.narrative b{color:var(--ink)}
+  .tip{font-size:.8rem;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--brass);border-radius:8px;padding:11px 13px;line-height:1.5;margin-top:14px}.tip b{color:var(--ink)}
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><span class="mark">F&amp;B Procurement Toolkit</span><a class="back" href="/projects/">← All tools</a></div>
+  <header class="hero">
+    <div class="eyebrow">Operations &amp; Budgeting · Domain — Budget vs Actual</div>
+    <h1>F&amp;B Budget &amp; <em>Variance</em> Model</h1>
+    <p class="lede">Beating or missing budget is the easy part — explaining <em>why</em> is the job. This bridges budgeted profit to actual and splits the gap into its real drivers: did volume move, did you discount on rate, did input costs inflate, did fixed costs creep? The variance waterfall every cost controller builds at month-end.</p>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k">Budget profit</div><div class="v" id="k_bud">€0</div><div class="s">planned departmental profit</div></div>
+    <div class="kpi"><div class="k">Actual profit</div><div class="v" id="k_act">€0</div><div class="s">realised</div></div>
+    <div class="kpi"><div class="k">Total variance</div><div class="v" id="k_var">€0</div><div class="s" id="k_var_s">favourable / unfavourable</div></div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="hd"><h2>Budget vs actual</h2><button class="ghost-btn" id="loadExample">Load example</button></div>
+      <div class="bd">
+        <div class="ivhead"><span>Driver</span><span>Budget</span><span>Actual</span></div>
+        <div class="grp">Volume &amp; rate</div>
+        <div class="iv"><label>Covers <small>guests served</small></label><input type="number" id="b_cov" min="0" step="1" placeholder="0"><input type="number" id="a_cov" min="0" step="1" placeholder="0"></div>
+        <div class="iv"><label>Avg revenue / cover</label><div class="amt"><input type="number" id="b_rev" min="0" step="any" placeholder="0"></div><div class="amt"><input type="number" id="a_rev" min="0" step="any" placeholder="0"></div></div>
+        <div class="grp">Costs</div>
+        <div class="iv"><label>Variable cost / cover <small>food, bev, hourly</small></label><div class="amt"><input type="number" id="b_vc" min="0" step="any" placeholder="0"></div><div class="amt"><input type="number" id="a_vc" min="0" step="any" placeholder="0"></div></div>
+        <div class="iv"><label>Fixed costs <small>period total</small></label><div class="amt"><input type="number" id="b_fx" min="0" step="any" placeholder="0"></div><div class="amt"><input type="number" id="a_fx" min="0" step="any" placeholder="0"></div></div>
+        <p class="tip" style="margin-top:18px"><b>How the split works:</b> volume is valued at <b>budget</b> contribution (the effect of covers alone), rate at <b>actual</b> covers (the effect of price alone), and cost-input at actual covers (the effect of unit-cost change alone). The four drivers always reconcile budget profit to actual exactly.</p>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd"><h2>Variance waterfall</h2></div>
+      <div class="bd">
+        <svg class="wf" id="wf" viewBox="0 0 480 280" aria-label="Variance waterfall"></svg>
+        <div class="bridge" id="bridge"></div>
+        <p class="narrative" id="narrative"></p>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · Budgeting, forecasting &amp; variance analysis</span>
+    <span>profit bridge: budget → volume → rate → cost-input → fixed → actual</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const v=id=>parseFloat(document.getElementById(id).value)||0;
+  const fmt0=n=>(n<0?'−':'')+'€'+Math.abs(Math.round(isFinite(n)?n:0)).toLocaleString('en-IE');
+  const setText=(id,t)=>document.getElementById(id).textContent=t;
+
+  function model(){
+    const Bc=v('b_cov'),Ac=v('a_cov'),Bp=v('b_rev'),Ap=v('a_rev'),Bvc=v('b_vc'),Avc=v('a_vc'),Bfx=v('b_fx'),Afx=v('a_fx');
+    const budProfit=Bc*Bp-Bc*Bvc-Bfx;
+    const actProfit=Ac*Ap-Ac*Avc-Afx;
+    const vol=(Ac-Bc)*(Bp-Bvc);          // volume at budget contribution
+    const rate=(Ap-Bp)*Ac;               // price effect at actual covers
+    const input=-(Avc-Bvc)*Ac;           // cost-input effect (negative if costs rose)
+    const fixed=-(Afx-Bfx);              // fixed creep
+    return {budProfit,actProfit,vol,rate,input,fixed,total:actProfit-budProfit,
+            hasData:(Bc>0||Ac>0)&&(Bp>0||Ap>0)};
+  }
+
+  function compute(){
+    const m=model();
+    setText('k_bud',fmt0(m.budProfit));
+    setText('k_act',fmt0(m.actProfit));
+    const vk=document.getElementById('k_var');vk.textContent=fmt0(m.total);vk.className='v '+(m.total>=0?'pos':'neg');
+    setText('k_var_s',m.total>=0?'favourable':'unfavourable');
+    drawWaterfall(m);
+    drawBridge(m);
+    narrate(m);
+  }
+
+  function drawWaterfall(m){
+    const svg=document.getElementById('wf');
+    if(!m.hasData){svg.innerHTML=`<text x="240" y="140" font-size="11" fill="#5C574B" text-anchor="middle" font-family="Hanken Grotesk">Enter budget and actual figures</text>`;return;}
+    const W=480,H=280,L=54,R=14,T=18,B=54,x0=L,x1=W-R,y0=H-B,y1=T,pw=x1-x0,ph=y0-y1;
+    const steps=[
+      {label:'Budget',val:m.budProfit,type:'anchor'},
+      {label:'Volume',val:m.vol,type:'delta'},
+      {label:'Rate',val:m.rate,type:'delta'},
+      {label:'Cost-input',val:m.input,type:'delta'},
+      {label:'Fixed',val:m.fixed,type:'delta'},
+      {label:'Actual',val:m.actProfit,type:'anchor'}
+    ];
+    // running totals to find y-range
+    let run=0;const tops=[];
+    steps.forEach(s=>{if(s.type==='anchor'){tops.push(0);tops.push(s.val);run=s.val;}else{tops.push(run);tops.push(run+s.val);run+=s.val;}});
+    let lo=Math.min(0,...tops),hi=Math.max(0,...tops);const pad=(hi-lo)*0.12||1;lo-=pad;hi+=pad;
+    const sy=val=>y0-((val-lo)/(hi-lo))*ph;
+    const n=steps.length,gap=10,bw=(pw-gap*(n-1))/n;
+    let g='';
+    // zero line
+    const zy=sy(0);g+=`<line x1="${x0}" y1="${zy}" x2="${x1}" y2="${zy}" stroke="rgba(27,26,22,.3)"/>`;
+    // y labels
+    for(let i=0;i<=4;i++){const val=lo+(hi-lo)*i/4,y=sy(val);g+=`<text class="axis" x="${x0-7}" y="${y+3}" text-anchor="end">${fmt0(val)}</text>`;}
+    run=0;let prevRight=null,prevY=null;
+    steps.forEach((s,i)=>{
+      const x=x0+i*(bw+gap);let top,bot,fill;
+      if(s.type==='anchor'){top=sy(Math.max(0,s.val));bot=sy(Math.min(0,s.val));fill='var(--pine)';run=s.val;}
+      else{const start=run,end=run+s.val;top=sy(Math.max(start,end));bot=sy(Math.min(start,end));fill=s.val>=0?'var(--good)':'var(--bad)';run=end;}
+      const h=Math.max(1,bot-top);
+      g+=`<rect x="${x}" y="${top}" width="${bw}" height="${h}" rx="2" fill="${fill}" fill-opacity="${s.type==='anchor'?1:.85}"/>`;
+      // connector
+      if(prevRight!==null)g+=`<line x1="${prevRight}" y1="${prevY}" x2="${x}" y2="${prevY}" stroke="rgba(27,26,22,.25)" stroke-dasharray="2 2"/>`;
+      prevRight=x+bw;prevY=sy(run);
+      // value label
+      const vy=(s.type==='delta'&&s.val<0)?bot+11:top-5;
+      g+=`<text class="axis" x="${x+bw/2}" y="${vy}" text-anchor="middle" font-weight="600" fill="${s.type==='anchor'?'#0F4C45':(s.val>=0?'#2E7D5B':'#A23B2E')}">${s.type==='delta'&&s.val>=0?'+':''}${fmt0(s.val)}</text>`;
+      // x label
+      g+=`<text class="axis" x="${x+bw/2}" y="${H-B+16}" text-anchor="middle">${s.label}</text>`;
+    });
+    svg.innerHTML=g;
+  }
+
+  function drawBridge(m){
+    const el=document.getElementById('bridge');
+    if(!m.hasData){el.innerHTML='';return;}
+    const fu=val=>val>=0?'<span class="fu fu-f">FAV</span>':'<span class="fu fu-u">UNFAV</span>';
+    const row=(lab,sub,val,anchor)=>`<div class="br ${anchor?'anchor':''}"><div class="lab"><b>${lab}</b>${sub?`<small>${sub}</small>`:''}</div><div class="val" style="color:${anchor?'var(--pine)':(val>=0?'var(--good)':'var(--bad)')}">${anchor?fmt0(val):((val>=0?'+':'')+fmt0(val))}</div>${anchor?'<span></span>':fu(val)}</div>`;
+    el.innerHTML=
+      row('Budget profit','',m.budProfit,true)+
+      row('Volume variance','more / fewer covers at budget contribution',m.vol)+
+      row('Rate variance','price per cover vs budget',m.rate)+
+      row('Cost-input variance','variable cost per cover vs budget',m.input)+
+      row('Fixed variance','fixed cost vs budget',m.fixed)+
+      row('Actual profit','',m.actProfit,true);
+  }
+
+  function narrate(m){
+    const el=document.getElementById('narrative');
+    if(!m.hasData){el.innerHTML='';return;}
+    const drivers=[{n:'volume',v:m.vol},{n:'rate (pricing)',v:m.rate},{n:'cost inflation',v:m.input},{n:'fixed-cost movement',v:m.fixed}];
+    const big=drivers.slice().sort((a,b)=>Math.abs(b.v)-Math.abs(a.v))[0];
+    const fav=drivers.filter(d=>d.v>0).sort((a,b)=>b.v-a.v);
+    const unf=drivers.filter(d=>d.v<0).sort((a,b)=>a.v-b.v);
+    let s=`Profit came in <b>${fmt0(m.total)} ${m.total>=0?'ahead of':'behind'}</b> budget. `;
+    s+=`The largest single driver is <b>${big.n}</b> at ${(big.v>=0?'+':'')+fmt0(big.v)}. `;
+    if(fav.length&&unf.length){s+=`Gains from ${fav.map(d=>d.n).join(' and ')} were ${m.total>=0?'enough to absorb':'outweighed by'} the drag from ${unf.map(d=>d.n).join(' and ')}.`;}
+    else if(unf.length){s+=`Every non-trivial driver worked against you — ${unf.map(d=>d.n).join(', ')}.`;}
+    else{s+=`All drivers ran favourable.`;}
+    el.innerHTML=s;
+  }
+
+  ['b_cov','a_cov','b_rev','a_rev','b_vc','a_vc','b_fx','a_fx'].forEach(id=>document.getElementById(id).addEventListener('input',compute));
+  document.getElementById('loadExample').addEventListener('click',()=>{
+    const ex={b_cov:9000,a_cov:9600,b_rev:45,a_rev:43.5,b_vc:14,a_vc:15.2,b_fx:95000,a_fx:97000};
+    Object.entries(ex).forEach(([k,val])=>document.getElementById(k).value=val);compute();
+  });
+  compute();
+})();
+</script>
+</body>
+</html>

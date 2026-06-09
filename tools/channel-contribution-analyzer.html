@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Channel Contribution Analyzer — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C; --clay:#9a6b55;
+    --good:#2E7D5B; --warn:#C8943B; --bad:#A23B2E;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;min-height:100vh;padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;}
+  .wrap{max-width:1160px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:.2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:28px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:66ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:15px 17px;opacity:0;animation:rise .6s forwards}
+  .kpi:nth-child(1){animation-delay:.1s}.kpi:nth-child(2){animation-delay:.16s}.kpi:nth-child(3){animation-delay:.22s}.kpi:nth-child(4){animation-delay:.28s}
+  .kpi .k{font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .kpi .v{font-family:'Spline Sans Mono',monospace;font-size:1.55rem;font-weight:500;margin-top:5px;color:var(--pine)}
+  .kpi .v.pos{color:var(--good)} .kpi .v.neg{color:var(--bad)}
+  .kpi .s{font-size:.71rem;color:var(--ink-soft);margin-top:2px}
+  .grid{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .2s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:16px 22px 22px}
+  .ghost-btn{font-family:inherit;font-size:.74rem;letter-spacing:.04em;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 11px;border-radius:999px;cursor:pointer;transition:.2s}
+  .ghost-btn:hover{border-color:var(--pine);color:var(--pine)}
+  .driver{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+  .driver label{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .driver input{width:130px}
+  input[type=number],input.txt,select{font-family:'Spline Sans Mono',monospace;font-size:.84rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px 9px;width:100%;text-align:right;transition:.15s}
+  input.txt{font-family:'Hanken Grotesk',sans-serif;text-align:left}
+  select{font-family:'Hanken Grotesk',sans-serif;text-align:left}
+  input:focus,select:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+  .ch-head,.ch-row{display:grid;grid-template-columns:1.5fr .8fr .85fr .85fr .85fr 26px;gap:8px;align-items:center}
+  .ch-head{font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;padding:0 2px 8px;text-align:right}
+  .ch-head span:first-child{text-align:left}
+  .ch-row{margin-bottom:8px}
+  @media(max-width:620px){.ch-head{display:none}.ch-row{grid-template-columns:1fr 1fr;gap:7px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.ch-row .nm{grid-column:1/-1}.ch-row .del{grid-column:2;justify-self:end}}
+  .del{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:1.1rem;padding:4px;border-radius:6px}
+  .del:hover{color:var(--bad);background:rgba(162,59,46,.08)}
+  .row-actions{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;align-items:center}
+  .add-btn{font-family:inherit;font-size:.84rem;font-weight:600;background:var(--pine);color:#F3EDE3;border:none;padding:9px 16px;border-radius:8px;cursor:pointer}
+  .add-btn:hover{background:var(--pine-soft)}
+  .sumwarn{font-size:.74rem;font-weight:600;margin-top:6px}
+  .shift{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+  .shift h3{font-family:'Fraunces',serif;font-style:italic;font-size:1rem;margin-bottom:10px}
+  .shift-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.86rem;color:var(--ink-soft)}
+  .shift-row input{width:64px} .shift-row select{width:auto;min-width:120px}
+  .shift-row .apply{font-family:inherit;font-size:.8rem;font-weight:600;background:var(--brass);color:#F3EDE3;border:none;padding:8px 14px;border-radius:7px;cursor:pointer}
+  .shift-row .apply:hover{filter:brightness(1.05)}
+  .mixbars{margin-bottom:18px}
+  .mixbar-lab{font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin:10px 0 5px;display:flex;justify-content:space-between}
+  .mixbar{display:flex;height:26px;border-radius:6px;overflow:hidden;border:1px solid var(--line);background:var(--paper)}
+  .mseg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;color:#F3EDE3;overflow:hidden;white-space:nowrap;transition:width .4s}
+  .legend{display:flex;gap:13px;flex-wrap:wrap;font-size:.72rem;color:var(--ink-soft);margin-top:10px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}.legend i{width:10px;height:10px;border-radius:2px}
+  .tbl{margin-top:8px;font-size:.8rem}
+  .tbl .tr{display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:8px;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .tbl .tr.h{font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .tbl .tr span:not(:first-child){text-align:right;font-family:'Spline Sans Mono',monospace}
+  .tbl .tr.tot{font-weight:600;border-bottom:none;border-top:1px solid var(--line);margin-top:3px;padding-top:9px}
+  .narrative{font-size:.9rem;line-height:1.6;color:var(--ink-soft);margin-top:16px}
+  .narrative b{color:var(--ink)}
+  .tip{font-size:.8rem;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--brass);border-radius:8px;padding:11px 13px;line-height:1.5;margin-top:14px}
+  .tip b{color:var(--ink)}
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><span class="mark">F&amp;B Procurement Toolkit</span><a class="back" href="/projects/">← All tools</a></div>
+  <header class="hero">
+    <div class="eyebrow">Revenue Management · Domain — Distribution &amp; Channel Cost</div>
+    <h1>Channel <em>Contribution</em> Analyzer</h1>
+    <p class="lede">Every booking channel carries a different distribution cost — a direct booking keeps most of the rate, an OTA or wholesaler hands a slice away. This models what shifting the channel mix does to net revenue and GOP at constant volume, so you can put a euro figure on "move ten points from OTA to direct."</p>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k">Blended dist. cost — current</div><div class="v" id="k_cur">0%</div><div class="s">% of room revenue</div></div>
+    <div class="kpi"><div class="k">Blended dist. cost — scenario</div><div class="v" id="k_scn">0%</div><div class="s">after mix shift</div></div>
+    <div class="kpi"><div class="k">Net revenue change</div><div class="v" id="k_delta">€0</div><div class="s">annual · flows to GOP</div></div>
+    <div class="kpi"><div class="k">GOP uplift</div><div class="v" id="k_uplift">—</div><div class="s">vs current net revenue</div></div>
+  </div>
+
+  <div class="grid">
+    <section class="card">
+      <div class="hd"><h2>Channels &amp; mix</h2><button class="ghost-btn" id="loadExample">Load example</button></div>
+      <div class="bd">
+        <div class="driver"><label for="totRN">Annual room-nights sold</label><input type="number" id="totRN" min="0" step="1" placeholder="0"><span style="font-size:.74rem;color:var(--ink-soft)">held constant across both scenarios</span></div>
+        <div class="ch-head"><span>Channel</span><span>Cost %</span><span>ADR €</span><span>Mix % now</span><span>Mix % scn</span><span></span></div>
+        <div id="rows"></div>
+        <div class="row-actions"><button class="add-btn" id="addRow">+ Add channel</button><span class="sumwarn" id="sumwarn"></span></div>
+
+        <div class="shift">
+          <h3>Quick shift</h3>
+          <div class="shift-row">
+            Move <input type="number" id="shiftPts" value="10" min="0" step="1"> points from
+            <select id="shiftFrom"></select> to <select id="shiftTo"></select>
+            <button class="apply" id="applyShift">Apply to scenario</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hd"><h2>Impact</h2></div>
+      <div class="bd">
+        <div class="mixbars">
+          <div class="mixbar-lab"><span>Current mix</span><span id="curblend"></span></div>
+          <div class="mixbar" id="barCur"></div>
+          <div class="mixbar-lab"><span>Scenario mix</span><span id="scnblend"></span></div>
+          <div class="mixbar" id="barScn"></div>
+          <div class="legend" id="legend"></div>
+        </div>
+        <div class="tbl" id="tbl"></div>
+        <p class="narrative" id="narrative"></p>
+        <div class="tip"><b>Why it matters:</b> distribution cost is one of the largest controllable lines in rooms revenue, and the cheapest lever an F&amp;B/commercial manager has — no extra covers required, pure margin. This is the revenue-side mirror of supplier cost control.</div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · Channel economics &amp; distribution cost</span>
+    <span>net = gross room revenue − distribution cost · Δ at constant volume flows to GOP</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const PAL=['#0F4C45','#B0852C','#9a6b55','#1F6358','#877f72','#2E7D5B'];
+  let data=[];
+  const v=id=>parseFloat(document.getElementById(id).value)||0;
+  const fmt0=n=>(n<0?'−':'')+'€'+Math.abs(Math.round(isFinite(n)?n:0)).toLocaleString('en-IE');
+  const pct=n=>(isFinite(n)?n:0).toFixed(1)+'%';
+
+  function rowT(r,i){
+    const d=document.createElement('div');d.className='ch-row';
+    d.innerHTML=`<input class="nm txt" type="text" value="${esc(r.name||'')}" data-i="${i}" data-f="name" placeholder="Channel">
+      <input type="number" min="0" step="any" value="${r.cost??''}" data-i="${i}" data-f="cost" placeholder="0">
+      <input type="number" min="0" step="any" value="${r.adr??''}" data-i="${i}" data-f="adr" placeholder="0">
+      <input type="number" min="0" step="any" value="${r.cur??''}" data-i="${i}" data-f="cur" placeholder="0">
+      <input type="number" min="0" step="any" value="${r.scn??''}" data-i="${i}" data-f="scn" placeholder="0">
+      <button class="del" data-del="${i}">×</button>`;
+    return d;
+  }
+  function render(){
+    const re=document.getElementById('rows');re.innerHTML='';
+    data.forEach((r,i)=>re.appendChild(rowT(r,i)));
+    const sel=q=>data.map((r,i)=>`<option value="${i}">${esc(r.name||('Channel '+(i+1)))}</option>`).join('');
+    const sf=document.getElementById('shiftFrom'),st=document.getElementById('shiftTo');
+    const pf=sf.value,pt=st.value;
+    sf.innerHTML=sel();st.innerHTML=sel();
+    if(pf&&pf<data.length)sf.value=pf; if(pt&&pt<data.length)st.value=pt;
+    else if(data.length>1)st.value=0;
+    compute();
+  }
+  function state(key){ // returns per-channel allocation for 'cur' or 'scn'
+    const totRN=v('totRN');
+    const sumMix=data.reduce((s,r)=>s+(parseFloat(r[key])||0),0)||1;
+    let gross=0,dist=0;
+    const rows=data.map(r=>{
+      const mix=(parseFloat(r[key])||0)/sumMix;
+      const rn=totRN*mix, g=rn*(parseFloat(r.adr)||0), dc=g*(parseFloat(r.cost)||0)/100;
+      gross+=g;dist+=dc;
+      return {name:r.name,rn,g,dc,net:g-dc};
+    });
+    return {rows,gross,dist,net:gross-dist,blended:gross>0?dist/gross*100:0,sumMix};
+  }
+  function compute(){
+    const cur=state('cur'),scn=state('scn');
+    document.getElementById('k_cur').textContent=pct(cur.blended);
+    document.getElementById('k_scn').textContent=pct(scn.blended);
+    const delta=scn.net-cur.net;
+    const de=document.getElementById('k_delta');de.textContent=fmt0(delta);de.className='v '+(delta>=0?'pos':'neg');
+    document.getElementById('k_uplift').textContent=cur.net>0?(delta/cur.net*100>=0?'+':'')+(delta/cur.net*100).toFixed(2)+'%':'—';
+
+    drawBars(cur,scn);
+    // table
+    const t=document.getElementById('tbl');
+    t.innerHTML=`<div class="tr h"><span>Channel</span><span>Net now</span><span>Net scn</span><span>Δ</span></div>`+
+      data.map((r,i)=>{const a=cur.rows[i],b=scn.rows[i];const d=b.net-a.net;
+        return `<div class="tr"><span>${esc(r.name||'—')}</span><span>${fmt0(a.net)}</span><span>${fmt0(b.net)}</span><span style="color:${d>=0?'var(--good)':'var(--bad)'}">${fmt0(d)}</span></div>`;}).join('')+
+      `<div class="tr tot"><span>Total net revenue</span><span>${fmt0(cur.net)}</span><span>${fmt0(scn.net)}</span><span style="color:${delta>=0?'var(--good)':'var(--bad)'}">${fmt0(delta)}</span></div>`;
+
+    // sum warnings
+    const sc=data.reduce((s,r)=>s+(parseFloat(r.cur)||0),0), ss=data.reduce((s,r)=>s+(parseFloat(r.scn)||0),0);
+    const w=document.getElementById('sumwarn');
+    const msgs=[];if(Math.round(sc)!==100)msgs.push('current mix '+sc.toFixed(0)+'%');if(Math.round(ss)!==100)msgs.push('scenario '+ss.toFixed(0)+'%');
+    w.textContent=msgs.length?('⚠ '+msgs.join(' · ')+' (normalised)'):'';w.style.color=msgs.length?'var(--warn)':'';
+
+    narrate(cur,scn,delta);
+  }
+  function drawBars(cur,scn){
+    const seg=(rows,total)=>rows.map((r,i)=>{const p=total>0?r.rn/total*100:0;return p>0?`<div class="mseg" style="width:${p}%;background:${PAL[i%PAL.length]}" title="${esc(r.name)} ${p.toFixed(1)}%">${p>11?p.toFixed(0)+'%':''}</div>`:'';}).join('');
+    const totRN=v('totRN');
+    document.getElementById('barCur').innerHTML=seg(cur.rows,totRN);
+    document.getElementById('barScn').innerHTML=seg(scn.rows,totRN);
+    document.getElementById('curblend').textContent='blended cost '+pct(cur.blended);
+    document.getElementById('scnblend').textContent='blended cost '+pct(scn.blended);
+    document.getElementById('legend').innerHTML=data.map((r,i)=>`<span><i style="background:${PAL[i%PAL.length]}"></i>${esc(r.name||'—')}</span>`).join('');
+  }
+  function narrate(cur,scn,delta){
+    const el=document.getElementById('narrative');
+    if(v('totRN')<=0||cur.gross<=0){el.innerHTML='';return;}
+    const dir=delta>=0?'adds':'removes';
+    el.innerHTML=`The scenario mix moves blended distribution cost from <b>${pct(cur.blended)}</b> to <b>${pct(scn.blended)}</b>, which ${dir} <b>${fmt0(Math.abs(delta))}</b> of net revenue a year at the same ${Math.round(v('totRN')).toLocaleString('en-IE')} room-nights. Because volume and operating costs are unchanged, that figure drops straight to GOP — it is margin won on commercial strategy, not on extra demand.`;
+  }
+  function esc(s){return String(s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));}
+
+  document.getElementById('rows').addEventListener('input',e=>{const i=e.target.dataset.i,f=e.target.dataset.f;if(i!==undefined){data[i][f]=e.target.value;if(f==='name')render();else compute();}});
+  document.getElementById('rows').addEventListener('click',e=>{if(e.target.dataset.del!==undefined){data.splice(+e.target.dataset.del,1);render();}});
+  document.getElementById('totRN').addEventListener('input',compute);
+  document.getElementById('addRow').addEventListener('click',()=>{data.push({name:'',cost:'',adr:'',cur:'',scn:''});render();});
+  document.getElementById('applyShift').addEventListener('click',()=>{
+    const pts=v('shiftPts'),fi=+document.getElementById('shiftFrom').value,ti=+document.getElementById('shiftTo').value;
+    if(fi===ti||!data[fi]||!data[ti])return;
+    const from=parseFloat(data[fi].scn)||0;const move=Math.min(pts,from);
+    data[fi].scn=(from-move); data[ti].scn=(parseFloat(data[ti].scn)||0)+move;
+    render();
+  });
+  document.getElementById('loadExample').addEventListener('click',()=>{
+    document.getElementById('totRN').value=20000;
+    data=[
+      {name:'Direct / Web',cost:4,adr:650,cur:45,scn:45},
+      {name:'OTA',cost:19,adr:600,cur:30,scn:30},
+      {name:'GDS / Corporate',cost:13,adr:620,cur:15,scn:15},
+      {name:'Wholesale / TO',cost:24,adr:560,cur:10,scn:10}
+    ];
+    render();
+    document.getElementById('shiftPts').value=10;
+    document.getElementById('shiftFrom').value=1;document.getElementById('shiftTo').value=0;
+  });
+
+  data=[{name:'Direct / Web',cost:4,adr:650,cur:50,scn:50},{name:'OTA',cost:19,adr:600,cur:50,scn:50}];
+  render();
+})();
+</script>
+</body>
+</html>
