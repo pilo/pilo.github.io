@@ -31,7 +31,11 @@ projects:
   - title: "F&B P&L & Prime-Cost Dashboard"
     category: "Operations & Budgeting · F&B P&L"
     description: "A live departmental P&L — revenue in, cost of sales and labour out, prime cost and GOP computed, with flow-through modelling on incremental revenue."
-    url: "/tools/fb-pnl-dashboard.html"    
+    url: "/tools/fb-pnl-dashboard.html"
+  - title: "Displacement & Hurdle Rate"
+    category: "Revenue Management · Group-vs-Transient"
+    description: "Model the opportunity cost of a discounted group booking against displaced transient demand, and find the hurdle rate that decides accept, negotiate, or decline."
+    url: "/tools/displacement-hurdle-rate.html"  
 ---
 
 F&B procurement and cost-control tools I'm building as I train toward RNCP certification. Each one turns a standard industry framework into something I can run on real numbers — the way a hotel-group buyer or cost controller would.
