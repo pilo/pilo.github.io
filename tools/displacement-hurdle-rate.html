@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Displacement & Hurdle Rate — F&B Procurement Toolkit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EDE3; --paper-2:#EAE1D2; --panel:#FBF7F0;
+    --ink:#1B1A16; --ink-soft:#5C574B; --line:rgba(27,26,22,.13);
+    --pine:#0F4C45; --pine-soft:#1F6358; --brass:#B0852C; --clay:#9a6b55;
+    --good:#2E7D5B; --warn:#C8943B; --bad:#A23B2E;
+    --shadow:0 1px 2px rgba(27,26,22,.04), 0 12px 30px -16px rgba(27,26,22,.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;
+    background-image:radial-gradient(circle at 12% -10%, rgba(15,76,69,.06), transparent 42%),
+                     radial-gradient(circle at 100% 0%, rgba(176,133,44,.07), transparent 40%);
+    background-attachment:fixed;min-height:100vh;
+    padding:clamp(18px,4vw,56px) clamp(14px,4vw,40px) 60px;
+  }
+  .wrap{max-width:1160px;margin:0 auto}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:30px}
+  .mark{font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--pine);font-weight:600}
+  .back{font-size:.78rem;letter-spacing:.06em;text-decoration:none;color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:2px;transition:.2s}
+  .back:hover{color:var(--pine);border-color:var(--pine)}
+  header.hero{margin-bottom:28px;opacity:0;animation:rise .7s .05s forwards}
+  .eyebrow{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--brass);font-weight:600;margin-bottom:10px}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.1rem);line-height:1.02;letter-spacing:-.01em}
+  h1 em{font-style:italic;color:var(--pine)}
+  .lede{max-width:66ch;color:var(--ink-soft);margin-top:12px;font-size:1.02rem}
+
+  /* KPI strip */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+  @media(max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:13px;box-shadow:var(--shadow);padding:15px 17px;opacity:0;animation:rise .6s forwards}
+  .kpi:nth-child(1){animation-delay:.1s}.kpi:nth-child(2){animation-delay:.16s}.kpi:nth-child(3){animation-delay:.22s}.kpi:nth-child(4){animation-delay:.28s}
+  .kpi .k{font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .kpi .v{font-family:'Spline Sans Mono',monospace;font-size:1.6rem;font-weight:500;margin-top:5px;letter-spacing:-.01em;color:var(--pine)}
+  .kpi .v.pos{color:var(--good)} .kpi .v.neg{color:var(--bad)}
+  .kpi .s{font-size:.71rem;color:var(--ink-soft);margin-top:2px}
+
+  /* verdict banner */
+  .verdict{display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-radius:13px;padding:15px 20px;margin-bottom:22px;border:1px solid;opacity:0;animation:rise .6s .32s forwards}
+  .verdict .tag{font-family:'Fraunces',serif;font-style:italic;font-size:1.5rem;white-space:nowrap}
+  .verdict .msg{font-size:.92rem;line-height:1.5}
+  .verdict.accept{background:rgba(46,125,91,.1);border-color:rgba(46,125,91,.3)} .verdict.accept .tag{color:var(--good)}
+  .verdict.negotiate{background:rgba(200,148,59,.12);border-color:rgba(200,148,59,.35)} .verdict.negotiate .tag{color:#9a6f1f}
+  .verdict.decline{background:rgba(162,59,46,.1);border-color:rgba(162,59,46,.3)} .verdict.decline .tag{color:var(--bad)}
+  .verdict b{color:var(--ink)}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;opacity:0;animation:rise .7s .2s forwards}
+  .card .hd{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+  .card .hd h2{font-family:'Fraunces',serif;font-weight:500;font-size:1.28rem}
+  .card .bd{padding:16px 22px 22px}
+  .ghost-btn{font-family:inherit;font-size:.74rem;letter-spacing:.04em;background:none;border:1px solid var(--line);color:var(--ink-soft);padding:6px 11px;border-radius:999px;cursor:pointer;transition:.2s}
+  .ghost-btn:hover{border-color:var(--pine);color:var(--pine)}
+
+  .grp{font-family:'Fraunces',serif;font-style:italic;font-size:1rem;margin:6px 0 10px;color:var(--ink)}
+  .grp.sp{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+  .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .field label{display:block;font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin-bottom:5px}
+  .field .hint{font-size:.68rem;color:var(--ink-soft);margin-top:3px}
+  .amt{position:relative}
+  .amt::before{content:"€";position:absolute;left:10px;top:50%;transform:translateY(-50%);font-family:'Spline Sans Mono',monospace;font-size:.82rem;color:var(--ink-soft);pointer-events:none}
+  input[type=number]{font-family:'Spline Sans Mono',monospace;font-size:.86rem;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;text-align:right;transition:.15s}
+  .amt input{padding-left:22px}
+  input[type=number]:focus{outline:none;border-color:var(--pine);box-shadow:0 0 0 3px rgba(15,76,69,.1)}
+
+  /* displacement slider */
+  .slider-wrap{margin-top:6px}
+  .slider-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .slider-top .lab{font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .slider-top .val{font-family:'Spline Sans Mono',monospace;font-size:1.15rem;font-weight:600;color:var(--pine)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:linear-gradient(90deg,var(--pine) var(--fill,100%),var(--paper-2) var(--fill,100%));border:1px solid var(--line);outline:none;cursor:pointer}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--pine);border:3px solid var(--panel);box-shadow:0 1px 4px rgba(27,26,22,.25);cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--pine);border:3px solid var(--panel);box-shadow:0 1px 4px rgba(27,26,22,.25);cursor:pointer}
+  .quick{display:flex;gap:7px;margin-top:11px}
+  .quick button{flex:1;font-family:inherit;font-size:.74rem;font-weight:600;background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);padding:7px;border-radius:7px;cursor:pointer;transition:.15s}
+  .quick button:hover{border-color:var(--pine);color:var(--pine)}
+  .slider-note{font-size:.74rem;color:var(--ink-soft);margin-top:11px;line-height:1.5}
+
+  /* chart + compare */
+  svg.chart{display:block;width:100%;height:auto;margin-bottom:8px}
+  .axis{font-size:9px;fill:var(--ink-soft);font-family:'Hanken Grotesk',sans-serif}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 4px}
+  .cmp{padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}
+  .cmp .t{font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:600}
+  .cmp .n{font-family:'Spline Sans Mono',monospace;font-size:1.25rem;font-weight:500;margin-top:4px}
+  .cmp.group .n{color:var(--pine)} .cmp.trans .n{color:var(--clay)}
+  .cmp .u{font-size:.68rem;color:var(--ink-soft)}
+  .narrative{font-size:.88rem;line-height:1.6;color:var(--ink-soft);margin-top:14px}
+  .narrative b{color:var(--ink)}
+  .tip{font-size:.8rem;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--brass);border-radius:8px;padding:11px 13px;line-height:1.5;margin-top:16px}
+  .tip b{color:var(--ink)}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:.74rem;color:var(--ink-soft);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+  @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <span class="mark">F&amp;B Procurement Toolkit</span>
+    <a class="back" href="/projects/">← All tools</a>
+  </div>
+
+  <header class="hero">
+    <div class="eyebrow">Revenue Management · Domain — Displacement &amp; Hurdle Rate</div>
+    <h1>Displacement &amp; <em>Hurdle Rate</em></h1>
+    <p class="lede">The group-versus-transient decision. A discounted group booking looks like guaranteed volume — but on a high-demand date it displaces higher-rate transient business you'd have sold anyway. This models the opportunity cost and returns the hurdle rate: the minimum group rate that still beats walking away. Accept volume only when it clears what it crowds out.</p>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><div class="k">Group contribution</div><div class="v" id="kpi_group">€0</div><div class="s">rooms + ancillary − variable</div></div>
+    <div class="kpi"><div class="k">Displaced transient</div><div class="v" id="kpi_disp">€0</div><div class="s">opportunity cost</div></div>
+    <div class="kpi"><div class="k">Net value of group</div><div class="v" id="kpi_net">€0</div><div class="s">group − displaced</div></div>
+    <div class="kpi"><div class="k">Hurdle ADR</div><div class="v" id="kpi_hurdle">€0</div><div class="s" id="kpi_hurdle_s">min group rate to break even</div></div>
+  </div>
+
+  <div class="verdict accept" id="verdict">
+    <span class="tag" id="v_tag">—</span>
+    <span class="msg" id="v_msg">Enter the booking and demand context.</span>
+  </div>
+
+  <div class="grid">
+    <!-- inputs -->
+    <section class="card">
+      <div class="hd"><h2>The decision</h2><button class="ghost-btn" id="loadExample">Load example</button></div>
+      <div class="bd">
+        <div class="grp">Group request</div>
+        <div class="fields">
+          <div class="field"><label>Rooms</label><input type="number" id="rooms" min="0" step="1" placeholder="0"></div>
+          <div class="field"><label>Nights</label><input type="number" id="nights" min="0" step="1" placeholder="0"></div>
+          <div class="field"><label>Group ADR</label><div class="amt"><input type="number" id="g_adr" min="0" step="any" placeholder="0"></div></div>
+          <div class="field"><label>Group ancillary / room-night</label><div class="amt"><input type="number" id="g_anc" min="0" step="any" placeholder="0"></div><div class="hint">F&amp;B, spa, meeting — net contribution</div></div>
+        </div>
+
+        <div class="grp sp">Transient alternative</div>
+        <div class="fields">
+          <div class="field"><label>Transient ADR</label><div class="amt"><input type="number" id="t_adr" min="0" step="any" placeholder="0"></div></div>
+          <div class="field"><label>Transient ancillary / room-night</label><div class="amt"><input type="number" id="t_anc" min="0" step="any" placeholder="0"></div></div>
+        </div>
+
+        <div class="grp sp">Shared</div>
+        <div class="fields">
+          <div class="field"><label>Variable cost / occupied room</label><div class="amt"><input type="number" id="vcost" min="0" step="any" placeholder="0"></div><div class="hint">housekeeping, amenities, commission</div></div>
+        </div>
+
+        <div class="grp sp">Demand &amp; displacement</div>
+        <div class="slider-wrap">
+          <div class="slider-top"><span class="lab">Displacement — % of group rooms that displace transient</span><span class="val" id="disp_val">100%</span></div>
+          <input type="range" id="disp" min="0" max="100" step="1" value="100">
+          <div class="quick">
+            <button data-d="0">Soft date · 0%</button>
+            <button data-d="50">Shoulder · 50%</button>
+            <button data-d="100">Compression · 100%</button>
+          </div>
+          <p class="slider-note">Displacement ≈ <b>0%</b> when demand is soft (the rooms wouldn't sell otherwise — take almost any rate above variable cost) and ≈ <b>100%</b> near sell-out (every group room costs you a transient sale). This single forecast assumption drives the whole decision.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- decision -->
+    <section class="card">
+      <div class="hd"><h2>Decision curve</h2></div>
+      <div class="bd">
+        <svg class="chart" id="chart" viewBox="0 0 360 230" aria-label="Net value vs displacement"></svg>
+        <div class="compare">
+          <div class="cmp group"><div class="t">Group · contribution / room-night</div><div class="n" id="cmp_g">€0</div><div class="u">what each group room earns</div></div>
+          <div class="cmp trans"><div class="t">Transient · contribution / room-night</div><div class="n" id="cmp_t">€0</div><div class="u">what a displaced room earns</div></div>
+        </div>
+        <p class="narrative" id="narrative"></p>
+        <div class="tip"><b>The same move as TCO, on the revenue side:</b> the best booking isn't the biggest — it's the one that clears its opportunity cost. TCO proves the cheapest price isn't the cheapest supplier; displacement proves the largest booking isn't the most valuable.</div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <span>RNCP study toolkit · Revenue management &amp; marginal-contribution reasoning</span>
+    <span>hurdle ADR = displacement × (transient contribution/RN) − group ancillary + variable cost</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const v = id => parseFloat(document.getElementById(id).value)||0;
+  const fmt0 = n => (n<0?'−':'')+'€'+Math.abs(Math.round(isFinite(n)?n:0)).toLocaleString('en-IE');
+  const setText=(id,t)=>document.getElementById(id).textContent=t;
+
+  function model(){
+    const rooms=v('rooms'), nights=v('nights');
+    const groupRN=rooms*nights;
+    const gPerRN=v('g_adr')+v('g_anc')-v('vcost');   // group contribution per room-night
+    const tPerRN=v('t_adr')+v('t_anc')-v('vcost');   // transient contribution per room-night
+    const d=v('disp')/100;                            // displacement fraction
+    const displacedRN=groupRN*d;
+    const groupContrib=groupRN*gPerRN;
+    const dispContrib=displacedRN*tPerRN;
+    const net=groupContrib-dispContrib;
+    // hurdle ADR at current displacement: gPerRN must equal d*tPerRN
+    const hurdleADR = d*tPerRN - v('g_anc') + v('vcost');
+    // break-even displacement fraction: d* = gPerRN / tPerRN
+    const dStar = tPerRN>0 ? gPerRN/tPerRN : (gPerRN>=0?Infinity:0);
+    return {rooms,nights,groupRN,gPerRN,tPerRN,d,displacedRN,groupContrib,dispContrib,net,hurdleADR,dStar};
+  }
+
+  function compute(){
+    const m=model();
+    // slider fill + label
+    document.documentElement.style.setProperty('--fill',(m.d*100)+'%');
+    setText('disp_val',(m.d*100).toFixed(0)+'%');
+
+    setText('kpi_group',fmt0(m.groupContrib));
+    setText('kpi_disp',fmt0(m.dispContrib));
+    const netEl=document.getElementById('kpi_net');
+    netEl.textContent=fmt0(m.net); netEl.className='v '+(m.net>=0?'pos':'neg');
+    setText('kpi_hurdle','€'+Math.round(Math.max(0,m.hurdleADR)).toLocaleString('en-IE'));
+    setText('cmp_g',fmt0(m.gPerRN));
+    setText('cmp_t',fmt0(m.tPerRN));
+
+    // verdict
+    const ve=document.getElementById('verdict');
+    const hasData=m.groupRN>0 && (v('g_adr')>0||v('t_adr')>0);
+    let cls='accept',tag='—',msg='Enter the booking and demand context.';
+    if(hasData){
+      const band=Math.max(1,Math.abs(m.groupContrib)*0.03);
+      const gap=v('g_adr')-m.hurdleADR;
+      if(m.net>band){cls='accept';tag='Accept';msg=`At ${(m.d*100).toFixed(0)}% displacement the group adds <b>${fmt0(m.net)}</b> over the transient alternative. The rate clears the hurdle by <b>€${Math.round(gap).toLocaleString('en-IE')}/room</b>.`;}
+      else if(m.net<-band){cls='decline';tag='Decline';msg=`At ${(m.d*100).toFixed(0)}% displacement the group costs you <b>${fmt0(-m.net)}</b> versus selling transient. It falls <b>€${Math.round(-gap).toLocaleString('en-IE')}/room</b> short of the €${Math.round(Math.max(0,m.hurdleADR)).toLocaleString('en-IE')} hurdle — counter, or hold the rooms.`;}
+      else {cls='negotiate';tag='Negotiate';msg=`This is line-ball — net <b>${fmt0(m.net)}</b>. The group sits right at its hurdle rate of <b>€${Math.round(Math.max(0,m.hurdleADR)).toLocaleString('en-IE')}/room</b>; push for rate or value-adds before committing.`;}
+    }
+    ve.className='verdict '+cls;
+    setText('v_tag',tag);
+    document.getElementById('v_msg').innerHTML=msg;
+
+    drawChart(m);
+    narrate(m);
+  }
+
+  function drawChart(m){
+    const svg=document.getElementById('chart');
+    const W=360,H=230,L=52,R=16,T=16,B=34, x0=L,x1=W-R,y0=H-B,y1=T, pw=x1-x0,ph=y0-y1;
+    if(m.groupRN<=0){ svg.innerHTML=`<text x="${W/2}" y="${H/2}" font-size="11" fill="#5C574B" text-anchor="middle" font-family="Hanken Grotesk">Enter rooms, nights and rates</text>`; return; }
+    const netAt = d => m.groupRN*(m.gPerRN - d*m.tPerRN);
+    const net0=netAt(0), net1=netAt(1);
+    let lo=Math.min(0,net0,net1), hi=Math.max(0,net0,net1);
+    const pad=(hi-lo)*0.12||1; lo-=pad; hi+=pad;
+    const sx=d=>x0+d*pw;
+    const sy=val=>y0-((val-lo)/(hi-lo))*ph;
+    const zeroY=sy(0);
+    let g='';
+    // grid + y labels
+    for(let i=0;i<=4;i++){const val=lo+(hi-lo)*i/4,y=sy(val);
+      g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="rgba(27,26,22,.08)"/><text class="axis" x="${x0-7}" y="${y+3}" text-anchor="end">${fmt0(val)}</text>`;}
+    // x labels
+    [0,25,50,75,100].forEach(p=>{const x=sx(p/100);g+=`<text class="axis" x="${x}" y="${H-B+16}" text-anchor="middle">${p}%</text>`;});
+    g+=`<text class="axis" x="${(x0+x1)/2}" y="${H-4}" text-anchor="middle">Displacement %</text>`;
+    // area split at zero
+    const ax0=sx(0),ax1=sx(1),ay0=sy(net0),ay1=sy(net1);
+    const areaD=`M${ax0},${zeroY} L${ax0},${ay0} L${ax1},${ay1} L${ax1},${zeroY} Z`;
+    g+=`<defs><clipPath id="above"><rect x="0" y="0" width="${W}" height="${zeroY}"/></clipPath><clipPath id="below"><rect x="0" y="${zeroY}" width="${W}" height="${H-zeroY}"/></clipPath></defs>`;
+    g+=`<path d="${areaD}" fill="rgba(46,125,91,.16)" clip-path="url(#above)"/>`;
+    g+=`<path d="${areaD}" fill="rgba(162,59,46,.15)" clip-path="url(#below)"/>`;
+    // zero baseline
+    g+=`<line x1="${x0}" y1="${zeroY}" x2="${x1}" y2="${zeroY}" stroke="rgba(27,26,22,.4)" stroke-width="1"/>`;
+    // break-even displacement marker
+    if(m.dStar>0 && m.dStar<1){const bx=sx(m.dStar);
+      g+=`<line x1="${bx}" y1="${y1}" x2="${bx}" y2="${y0}" stroke="var(--brass)" stroke-width="1.3" stroke-dasharray="4 3"/>`;
+      g+=`<text class="axis" x="${bx}" y="${y1+10}" text-anchor="middle" fill="#9a6f1f">holds to ${(m.dStar*100).toFixed(0)}%</text>`;}
+    // the line
+    g+=`<path d="M${ax0},${ay0} L${ax1},${ay1}" fill="none" stroke="var(--pine)" stroke-width="2.4" stroke-linecap="round"/>`;
+    // current displacement point
+    const cx=sx(m.d), cy=sy(netAt(m.d)), pos=netAt(m.d)>=0;
+    g+=`<circle cx="${cx}" cy="${cy}" r="5.5" fill="${pos?'var(--good)':'var(--bad)'}" stroke="#FBF7F0" stroke-width="2"/>`;
+    svg.innerHTML=g;
+  }
+
+  function narrate(m){
+    const el=document.getElementById('narrative');
+    if(m.groupRN<=0){el.innerHTML='';return;}
+    let s='';
+    if(m.tPerRN<=0){
+      s=`Transient contribution per room is not positive here, so the group displaces nothing of value — accept on contribution grounds alone.`;
+    } else if(m.dStar>=1){
+      s=`The group out-earns transient per room (<b>${fmt0(m.gPerRN)}</b> vs <b>${fmt0(m.tPerRN)}</b>), so it stays accretive even at full displacement — take it.`;
+    } else {
+      s=`The deal stays positive up to <b>${(m.dStar*100).toFixed(0)}% displacement</b>. Below that, the ${m.groupRN} room-nights are worth more than the transient they crowd out; above it, you'd earn more leaving the rooms for individual sale. Your decision rests entirely on the demand forecast — if these dates are heading for compression, treat displacement as high and hold to the <b>€${Math.round(Math.max(0,m.hurdleADR)).toLocaleString('en-IE')}</b> hurdle.`;
+    }
+    el.innerHTML=s;
+  }
+
+  ['rooms','nights','g_adr','g_anc','t_adr','t_anc','vcost','disp'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', compute);
+  });
+  document.querySelectorAll('.quick button').forEach(b=>{
+    b.addEventListener('click',()=>{document.getElementById('disp').value=b.dataset.d;compute();});
+  });
+  document.getElementById('loadExample').addEventListener('click',()=>{
+    const ex={rooms:20,nights:2,g_adr:280,g_anc:60,t_adr:420,t_anc:30,vcost:40};
+    Object.entries(ex).forEach(([k,val])=>document.getElementById(k).value=val);
+    document.getElementById('disp').value=100;
+    compute();
+  });
+
+  compute();
+})();
+</script>
+</body>
+</html>
